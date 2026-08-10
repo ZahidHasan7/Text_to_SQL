@@ -1,0 +1,108 @@
+% Main LaTeX build file (created from updated thesis report.txt)
+% Contains merged Chapter 5 and corrected \textbf commands.
+\documentclass[12pt,a4paper]{report}
+\usepackage{setspace}
+\usepackage{lipsum}
+\usepackage{geometry}
+\usepackage{titlesec}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{placeins}
+\geometry{a4paper,left=1in,right=1in,top=1in,bottom=1in}
+\onehalfspacing
+\lstdefinelanguage{json}{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    string=[s]{"}{"},
+    stringstyle=\color{black},
+    comment=[l]{:},
+    commentstyle=\color{black},
+    morekeywords={true,false,null},
+    keywordstyle=\color{black}\bfseries,
+    literate=*{:}{{:}}{1}{,}{,}{1}{\{}{{ \{ }}{1}{\}}{{\} }}{1}{[}{{[ }}{1}{]}{{ ]}}{1},
+}
+\lstset{basicstyle=\ttfamily\small,breaklines=true,frame=single,columns=fullflexible,keepspaces=true,showstringspaces=false,inputencoding=utf8,extendedchars=true,literate={τ}{{$\tau$}}1 {≤}{{$\le$}}1 {≥}{{$\ge$}}1 {→}{{$\to$}}1 {≠}{{$\neq$}}1}
+\title{\textbf{The Role of Structure in Reasoning:}\\\textbf{A Comparative Evaluation of Structured Chain-of-Thought Prompting for Text-to-SQL with Modern Language Models}}
+\author{M. M. Zahid Hasan \\ Towhidur Rahman Asif}
+\date{Shahjalal University of Science and Technology, Sylhet\\[6pt]Date: ___}
+\begin{document}
+\maketitle
+\pagenumbering{roman}\setcounter{page}{2}
+\begin{abstract}
+The arrival of Large Language Models (LLMs) has shown tremendous promise for improving Text-to-SQL tasks, though their ability to handle complex queries requiring multi-step logical reasoning remains a key challenge. To address the limitations of unstructured reasoning, we introduce \textbf{Structured Chain-of-Thought (SCoT)}, a novel prompting methodology that constrains the LLM's deliberation process within a predefined, step-by-step framework.
+
+In this work, we analyze the responses of multiple modern LLMs by comparing SCoT with other prompting styles such as: (A) Chain-of-Thought, (B) Least-to-Most, (C) QDecomp, (D) QDecomp + InterCOL, and (E) Standard prompting. Our intention was to evaluate SCoT against these existing approaches, and we find that SCoT outperforms all other prompting styles across multiple evaluation settings.
+\end{abstract}
+\newpage\pagenumbering{arabic}
+\chapter{Introduction}
+% (Chapter 1 content copied from thesis report.txt)
+% ... (omitted for brevity; full content resides in thesis report.txt)
+\chapter{Literature Review and Related Work}
+% (Chapter 2 content copied)
+\chapter{Methodology}
+% (Chapter 3 content copied)
+\chapter{Results and Analysis}
+% (Chapter 4 content copied)
+\chapter{Conclusions and Future Work}
+\section{Conclusions}
+We studied multiple prompting strategies for Text-to-SQL inside this project folder and extended earlier reasoning work by applying SCoT to two model settings. SCoT delivered higher execution accuracy than all baselines on both Gemini 2.5 Pro (dev_600) and GPT-4o-mini (dev_500), while keeping reasoning simple and reducing propagation of clause-level errors. Standard, QDecomp, and QDecomp_InterCol remained competitive, especially on the smaller model. Chain-of-Thought stayed weakest, matching prior observations that overly detailed clause narration can introduce mistakes.
+
+SCoT’s structured pass, candidate generation, and ranking pipeline offer practical gains without requiring manual annotation beyond existing schema and question data. The results show that careful structure can help even when raw model strength changes.
+\section{Limitations and Threats to Validity}
+\begin{itemize}
+  \item \textbf{Scope of data:} Only dev subsets (500 and 600 queries) were used; no full train/test generalization claims.
+  \item \textbf{Model coverage:} Gemini 2.5 Pro and GPT-4o-mini only; other models not evaluated here.
+  \item \textbf{Execution-only metric:} We rely on execution accuracy; SQL exact match was not added in new sections.
+  \item \textbf{Error granularity:} Gemini error CSV groups broad categories; deeper semantic mismatch tagging not included.
+  \item \textbf{Limited divergence patterns (dev_500):} Few consistent patterns, so statistical depth is low.
+\end{itemize}
+\section{Ethical Considerations and Responsible Use}
+\subsection{SQL Injection and Security Risks}
+\textbf{Risk:} Executing model-generated SQL on production databases without sanitization enables SQL injection attacks. Malicious prompts (e.g., ``Delete all users'') could propagate through the pipeline.
+\textbf{Mitigation:}
+\begin{enumerate}
+  \item \textbf{Read-only execution:} All evaluation queries execute with read-only database permissions.
+  \item \textbf{Schema validation:} \texttt{\_uses\_only\_schema()} rejects queries referencing non-existent tables, preventing injection via crafted table names.
+  \item \textbf{Timeout enforcement:} 5-second execution limit prevents resource exhaustion attacks.
+\end{enumerate}
+\textbf{Recommendation:} Production deployments must employ prepared statements, query parameterization, and least-privilege database accounts.
+\subsection{Data Privacy}
+\textbf{Risk:} LLM APIs (Gemini, GPT) may log prompts containing sensitive schema metadata or query patterns, potentially leaking proprietary database structures.
+\textbf{Mitigation:}
+\begin{enumerate}
+  \item Use anonymized schema labels in research datasets.
+  \item Consider local model hosting for privacy-critical applications.
+  \item Review API terms-of-service for data retention policies.
+\end{enumerate}
+\textbf{Threat:} Real-world deployment on confidential databases requires local model hosting or zero-data-retention API contracts.
+\subsection{Bias and Fairness}
+\textbf{Risk:} Training data biases may propagate into SQL generation.
+\textbf{Mitigation:} Spider benchmark uses domain-neutral schemas; fairness audits needed for sensitive domains.
+\subsection{Misuse Potential}
+\textbf{Risk:} Automated SQL generation lowers barriers to unauthorized data access.
+\textbf{Mitigation:}
+\begin{enumerate}
+  \item Integrate RBAC systems.
+  \item Log generated SQL with user identity.
+  \item Use supervised deployment environments.
+\end{enumerate}
+\section{Future Work}
+\begin{itemize}
+  \item Add semantic row cardinality hints to structured plans.
+  \item Unified error tagging across subsets for finer classification.
+  \item Test portability to other SQL dialects beyond SQLite.
+  \item Evaluate on larger/noisier question sets for schema grounding stress.
+\end{itemize}
+\end{document}

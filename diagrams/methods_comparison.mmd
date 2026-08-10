@@ -1,0 +1,57 @@
+%%{init: {'securityLevel': 'loose', 'theme': 'default'}}%%
+flowchart TB
+    table1["<table style='border-collapse:collapse; font-size:14px; margin:6px'>
+      <thead>
+        <tr>
+          <th style='padding:8px 10px; border:1px solid #ccc; background:#f2f2f2'>Aspect</th>
+          <th style='padding:8px 10px; border:1px solid #ccc; background:#e6f7ff'>Standard</th>
+          <th style='padding:8px 10px; border:1px solid #ccc; background:#fff7e6'>SCoT</th>
+          <th style='padding:8px 10px; border:1px solid #ccc; background:#f9e6ff'>QDecomp</th>
+          <th style='padding:8px 10px; border:1px solid #ccc; background:#e6ffe6'>QDecomp+InterCol</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style='padding:8px 10px; border:1px solid #ccc'>Format</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>Free Text</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>JSON</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>NL Steps</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>NL Steps + Schema Hints</td>
+        </tr>
+        <tr>
+          <td style='padding:8px 10px; border:1px solid #ccc'>Candidates</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>Single</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>Multiple (4-7)</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>Single</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>Single</td>
+        </tr>
+        <tr>
+          <td style='padding:8px 10px; border:1px solid #ccc'>Validation</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>None</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>Schema / Logic</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>None</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>Light Schema</td>
+        </tr>
+        <tr>
+          <td style='padding:8px 10px; border:1px solid #ccc'>Repair</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>None</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>Auto-Fix</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>None</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>None</td>
+        </tr>
+        <tr>
+          <td style='padding:8px 10px; border:1px solid #ccc'>Accuracy (Gemini)</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>73.67%</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>84.33%</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>73.67%</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>75.17%</td>
+        </tr>
+        <tr>
+          <td style='padding:8px 10px; border:1px solid #ccc'>Accuracy (OpenAI)</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>69.60%</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>70.19%</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>69.00%</td>
+          <td style='padding:8px 10px; border:1px solid #ccc'>69.20%</td>
+        </tr>
+      </tbody>
+    </table>"]

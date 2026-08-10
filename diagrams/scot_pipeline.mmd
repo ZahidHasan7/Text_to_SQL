@@ -1,0 +1,87 @@
+---
+config:
+  layout: elk
+---
+flowchart TB
+ subgraph Row1["Row1"]
+    direction LR
+        SCH[("DB<br>Schema")]
+        PAT[("Pattern<br>Library")]
+        Q["User<br>Question"]
+  end
+ subgraph Row4["Row4"]
+    direction TB
+        CANON["Canonicalization"]
+        EXEC["Execution-Guided<br>Ranking"]
+        SELECT_FINAL["Final SQL<br>Selection"]
+        METRICS[("Row counts,<br>success flags,<br>heuristic scores")]
+  end
+ subgraph Row2["Row2"]
+    direction TB
+        PGEN["Plan<br>Generation"]
+        PCHECK["Plan-Check<br>Validation"]
+        CGEN["Pattern-Aware<br>Candidate<br>Generation"]
+        SAN["Pre-SQL<br>Sanitization"]
+  end
+ subgraph MidRow["MidRow"]
+    direction LR
+        Row4
+        Row2
+  end
+ subgraph Row3["Row3"]
+    direction TB
+        GBHAV["GROUP BY / HAVING<br>Validation"]
+        SCHEMA["Schema<br>Validation"]
+        DISC1[("Pruned")]
+        DISC2[("Pruned")]
+  end
+    Q --> PGEN
+    SCH --> PGEN & SCHEMA & EXEC
+    PAT --> PGEN
+    PGEN -- plan --> PCHECK
+    PCHECK -- valid --> CGEN
+    PCHECK -- "invalid -> regenerate" --> PGEN
+    CGEN -- "4-7 SQL drafts" --> SAN
+    SAN --> GBHAV
+    GBHAV -- valid --> SCHEMA
+    GBHAV -- invalid --> DISC1
+    SCHEMA -- valid --> CANON
+    SCHEMA -- invalid --> DISC2
+    CANON --> EXEC
+    EXEC -- scores --> SELECT_FINAL
+    EXEC --> METRICS
+    Row4 --> MidRow & MidRow
+    MidRow --> n1["Untitled Node"] & n2["Untitled Node"] & n3["Untitled Node"]
+    Row2 --> MidRow
+
+     SCH:::bigText
+     SCH:::external
+     PAT:::bigText
+     PAT:::external
+     Q:::bigText
+     CANON:::bigText
+     EXEC:::bigText
+     SELECT_FINAL:::bigText
+     METRICS:::bigText
+     PGEN:::bigText
+     PCHECK:::bigText
+     CGEN:::bigText
+     SAN:::bigText
+     GBHAV:::bigText
+     SCHEMA:::bigText
+     DISC1:::bigText
+     DISC2:::bigText
+    classDef bigText font-size:16px
+    classDef external fill:#ffffff,stroke:#666,stroke-dasharray:4 2
+    style CANON fill:#e6f2ff,stroke:#66b3ff
+    style EXEC fill:#e0ccff,stroke:#9933ff
+    style SELECT_FINAL fill:#ccffcc,stroke:#33aa33
+    style METRICS fill:#f9f0ff,stroke:#cc66ff
+    style PGEN fill:#cce5ff,stroke:#3399ff
+    style PCHECK fill:#ffe5cc,stroke:#ff9933
+    style CGEN fill:#cce5ff,stroke:#3399ff
+    style SAN fill:#e6f2ff,stroke:#66b3ff
+    style GBHAV fill:#ffe5cc,stroke:#ff9933
+    style SCHEMA fill:#ffe5cc,stroke:#ff9933
+    style DISC1 fill:#f2f2f2,stroke:#999
+    style DISC2 fill:#f2f2f2,stroke:#999
