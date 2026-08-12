@@ -18,7 +18,7 @@ GEMINI_BASE = os.getenv("GEMINI_BASE", "https://generativelanguage.googleapis.co
 OPENAI_BASE = os.getenv("OPENAI_BASE", "https://api.openai.com/v1")
 OPENROUTER_BASE = os.getenv("OPENROUTER_BASE", "https://openrouter.ai/api/v1")
 
-DEFAULT_GEMINI_MODELS = ["models/gemini-3.5-flash"]
+DEFAULT_GEMINI_MODELS = ["models/gemini-3.6-flash"]
 DEFAULT_OPENAI_MODELS = ["gpt-4o-mini"]
 OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "google/gemini-2.5-pro")
 DEFAULT_OPENROUTER_MODELS = [OPENROUTER_MODEL]
