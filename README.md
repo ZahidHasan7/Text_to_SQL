@@ -13,7 +13,7 @@ This repository contains the complete research codebase for the journal paper:
 > Metric: **Execution Accuracy (EX)**
 
 The codebase includes:
-- A unified LLM pipeline supporting both **Gemini** and **OpenAI** models via a single API
+- A unified LLM pipeline supporting **OpenRouter**, **Gemini**, and **OpenAI** models via a single API
 - Strict **database-level data splitting** to prevent prompt contamination
 - Automated **data integrity and leakage tests**
 - Five evaluation methods: **SCoT**, **CoT**, **Standard**, **QDecomp**, **QDecomp-InterCol**
@@ -25,7 +25,7 @@ The codebase includes:
 
 ```
 .
-├── utils_llm.py              # Unified LLM API (Gemini + OpenAI, retry, cache)
+├── utils_llm.py              # Unified LLM API (OpenRouter + Gemini + OpenAI, retry, cache)
 │
 ├── 01_data_split.py          # Spider dev set preparation + audit manifest
 ├── 02_leakage_tests.py       # Automated data integrity & leakage tests
@@ -36,7 +36,7 @@ The codebase includes:
 ├── 03_run_qd_intercol.py     # QDecomp + Inter-Column baseline
 ├── 04_evaluation.py          # Execution Accuracy evaluator + experiment log
 │
-├── utils_gemini_rest.py      # Legacy Gemini REST utility (kept for reference)
+├── utils_gemini_rest.py      # Backward-compatible wrapper that delegates to utils_llm.py
 ├── openai_gpt/               # Legacy OpenAI utilities (kept for reference)
 │
 ├── diagrams/                 # Architecture and result figures
@@ -60,8 +60,8 @@ The codebase includes:
 | Evaluation Examples | 1,034 |
 | Random Seed | 42 |
 | Metric | Execution Accuracy (EX) |
-| Primary Model | Gemini 3.5 Flash / Gemini 2.5 Pro |
-| Baseline Model | GPT-4o-mini |
+| Primary Model | OpenRouter model selected via `OPENROUTER_MODEL` |
+| Baseline Model | OpenRouter, Gemini, or OpenAI depending on `LLM_PROVIDER` |
 | SQLite Timeout | 10 seconds per query |
 
 ---
@@ -91,16 +91,27 @@ data/
 ```
 
 ### 4. Configure API Keys
-Create a `.env` file in the project root:
+Create a local `.env` file in the project root. The recommended setup uses a single OpenRouter API key:
 ```env
-# Use Gemini
-LLM_PROVIDER=gemini
-GEMINI_API_KEY=your_gemini_api_key_here
+# Recommended: OpenRouter
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+OPENROUTER_MODEL=google/gemini-2.5-pro
 
-# OR use OpenAI
-# LLM_PROVIDER=openai
+# Optional: force OpenRouter explicitly if you want to override auto-detection
+LLM_PROVIDER=openrouter
+
+# Legacy direct providers are still supported if you explicitly configure them:
+# GEMINI_API_KEY=your_gemini_api_key_here
 # OPENAI_API_KEY=your_openai_api_key_here
 ```
+
+> **Important:** `.env` is local only and must not be committed to GitHub. The repository includes `.env.example` as a placeholder template, not a secret-bearing file.
+
+The active LLM path is:
+
+`runner -> utils_gemini_rest.py (legacy compatibility only, where used) -> utils_llm.py -> OpenRouter`
+
+For OpenRouter, you only need to change `OPENROUTER_MODEL` to switch models. No Python source changes are required.
 
 ---
 
