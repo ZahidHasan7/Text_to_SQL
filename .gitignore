@@ -1,0 +1,26 @@
+# ── Environment & secrets ──────────────────────────────────────────────
+.env
+.venv/
+
+# ── Python cache ───────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+
+# ── Spider dataset (large — download separately) ───────────────────────
+data/
+
+# ── Experiment outputs (large — generated locally) ────────────────────
+runs/
+
+# ── Embedded Python environment (bootstrapped locally) ────────────────
+pyenv/
+python-embed.zip
+
+# ── Scratch / temp files ───────────────────────────────────────────────
+scratch_update.py
+tmp_std_wins.py
+~$*
+
+# ── Large binary / office files ───────────────────────────────────────
+*.pptx

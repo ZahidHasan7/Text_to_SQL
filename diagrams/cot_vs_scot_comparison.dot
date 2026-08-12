@@ -1,0 +1,204 @@
+digraph CoT_vs_SCoT_Comparison {
+    // Global layout
+    rankdir=TB;
+    compound=true;
+    nodesep=0.60;     // a bit more horizontal spacing
+    ranksep=0.50;
+    splines=polyline;
+    margin=0.20;
+
+    graph [fontname="Helvetica", fontsize=11];
+    node  [fontname="Helvetica", fontsize=10, style="filled,rounded", shape=box, height=0.35];
+    edge  [fontname="Helvetica", fontsize=9, arrowsize=0.6, color="#555555"];
+
+    // Title
+    labelloc="t";
+    label=<<FONT POINT-SIZE="16"><B>Comparison: Chain-of-Thought vs. Structured Chain-of-Thought</B></FONT>>;
+
+    // ===== Legend / Comparison Summary Table =====
+    subgraph cluster_legend {
+        label="";
+        style=invis;
+
+        legend [label=<
+            <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5">
+                <TR>
+                    <TD BGCOLOR="#37474f">
+                        <FONT COLOR="white" POINT-SIZE="12"><B>Aspect</B></FONT>
+                    </TD>
+                    <TD BGCOLOR="#37474f">
+                        <FONT COLOR="white" POINT-SIZE="12"><B>CoT</B></FONT>
+                    </TD>
+                    <TD BGCOLOR="#37474f">
+                        <FONT COLOR="white" POINT-SIZE="12"><B>SCoT</B></FONT>
+                    </TD>
+                </TR>
+                <TR>
+                    <TD ALIGN="LEFT" BGCOLOR="#eceff1">
+                        <FONT POINT-SIZE="11"><B>Format</B></FONT>
+                    </TD>
+                    <TD BGCOLOR="white">
+                        <FONT POINT-SIZE="11">Free Text</FONT>
+                    </TD>
+                    <TD BGCOLOR="white">
+                        <FONT POINT-SIZE="11">JSON</FONT>
+                    </TD>
+                </TR>
+                <TR>
+                    <TD ALIGN="LEFT" BGCOLOR="#eceff1">
+                        <FONT POINT-SIZE="11"><B>Candidates</B></FONT>
+                    </TD>
+                    <TD BGCOLOR="white">
+                        <FONT POINT-SIZE="11">Single</FONT>
+                    </TD>
+                    <TD BGCOLOR="white">
+                        <FONT POINT-SIZE="11">Multiple (4–7)</FONT>
+                    </TD>
+                </TR>
+                <TR>
+                    <TD ALIGN="LEFT" BGCOLOR="#eceff1">
+                        <FONT POINT-SIZE="11"><B>Validation</B></FONT>
+                    </TD>
+                    <TD BGCOLOR="white">
+                        <FONT POINT-SIZE="11">None</FONT>
+                    </TD>
+                    <TD BGCOLOR="white">
+                        <FONT POINT-SIZE="11">Schema / Logic</FONT>
+                    </TD>
+                </TR>
+                <TR>
+                    <TD ALIGN="LEFT" BGCOLOR="#eceff1">
+                        <FONT POINT-SIZE="11"><B>Repair</B></FONT>
+                    </TD>
+                    <TD BGCOLOR="white">
+                        <FONT POINT-SIZE="11">Manual</FONT>
+                    </TD>
+                    <TD BGCOLOR="white">
+                        <FONT POINT-SIZE="11">Auto-Fix</FONT>
+                    </TD>
+                </TR>
+                <TR>
+                    <TD ALIGN="LEFT" BGCOLOR="#eceff1">
+                        <FONT POINT-SIZE="11"><B>Accuracy (Gemini)</B></FONT>
+                    </TD>
+                    <TD BGCOLOR="#ffebee">
+                        <FONT POINT-SIZE="11">40.17%</FONT>
+                    </TD>
+                    <TD BGCOLOR="#e8f5e9">
+                        <FONT POINT-SIZE="11"><B>84.33%</B></FONT>
+                    </TD>
+                </TR>
+                <TR>
+                    <TD ALIGN="LEFT" BGCOLOR="#eceff1">
+                        <FONT POINT-SIZE="11"><B>Accuracy (openAI)</B></FONT>
+                    </TD>
+                    <TD BGCOLOR="#ffebee">
+                        <FONT POINT-SIZE="11">65.22%</FONT>
+                    </TD>
+                    <TD BGCOLOR="#e8f5e9">
+                        <FONT POINT-SIZE="11"><B>70.19%</B></FONT>
+                    </TD>
+                </TR>
+            </TABLE>
+        >, shape=plaintext];
+    }
+
+    // ===== Standard CoT Column =====
+    subgraph cluster_cot {
+        label=<<B>Standard CoT</B>>;
+        style="filled,rounded";
+        color="#eeeeee";
+        fontsize=12;
+        penwidth=1.2;
+        node [width=2.5];
+
+        cot_input  [label="Input:\nQuestion + Schema", fillcolor="#e1f5ff"];
+        cot_reason [label="Generate Reasoning\n(Step-by-step Natural Language)", fillcolor="#fff3e0"];
+        cot_step1  [label="1. Tables (FROM/JOIN)", fillcolor="#ffe0b2"];
+        cot_step2  [label="2. Filter (WHERE)",     fillcolor="#ffe0b2"];
+        cot_step3  [label="3. GROUP BY",           fillcolor="#ffe0b2"];
+        cot_step4  [label="4. HAVING / Constraints", fillcolor="#ffe0b2"];
+        cot_step5  [label="5. SELECT Columns",     fillcolor="#ffe0b2"];
+        cot_sql    [label="Generate Single SQL",    fillcolor="#c8e6c9"];
+        cot_exec   [label="Execute SQL",            fillcolor="#ffcdd2"];
+
+        cot_input  -> cot_reason;
+        cot_reason -> cot_step1;
+        cot_step1  -> cot_step2;
+        cot_step2  -> cot_step3;
+        cot_step3  -> cot_step4;
+        cot_step4  -> cot_step5;
+        cot_step5  -> cot_sql;
+        cot_sql    -> cot_exec;
+    }
+
+    // ===== SCoT Column =====
+    subgraph cluster_scot {
+        label=<<B>Structured CoT (SCoT)</B>>;
+        style="filled,rounded";
+        color="#eeeeee";
+        fontsize=12;
+        penwidth=1.2;
+        node [width=2.7];
+
+        scot_input    [label="Input:\nQuestion + Schema",           fillcolor="#e1f5ff"];
+        scot_plan     [label="1. Plan Generation (JSON)",           fillcolor="#fff3e0"];
+        scot_check    [label="2. Plan & Schema Validation",         fillcolor="#f3e5f5"];
+        scot_pattern  [label="3. Pattern Detection\n(Negation / Set Ops)", fillcolor="#e0f2f1"];
+        scot_multi    [label="4. Multi-Candidate\nGeneration (4–7)",       fillcolor="#fff9c4"];
+        scot_sanitize [label="5. Pre-SQL Sanitization",             fillcolor="#e3f2fd"];
+        scot_groupby  [label="6. GROUP BY / HAVING Auto-Fix",       fillcolor="#fce4ec"];
+        scot_schema   [label="7. Schema Validation (Tables/Columns)", fillcolor="#f1f8e9"];
+        scot_canon    [label="8. Canonicalization",                 fillcolor="#fff3e0"];
+        scot_rank     [label="9. Execution-Guided Ranking",         fillcolor="#e0f7fa"];
+        scot_best     [label="Execute Best SQL",                    fillcolor="#c8e6c9"];
+
+        scot_input    -> scot_plan;
+        scot_plan     -> scot_check;
+        scot_check    -> scot_pattern;
+        scot_pattern  -> scot_multi;
+        scot_multi    -> scot_sanitize;
+        scot_sanitize -> scot_groupby;
+        scot_groupby  -> scot_schema;
+        scot_schema   -> scot_canon;
+        scot_canon    -> scot_rank;
+        scot_rank     -> scot_best;
+    }
+
+    // Extra invisible node to keep the two inputs from overlapping
+    spacer_top [label="", width=0.4, style=invis, shape=point];
+
+    // Align inputs + legend on same row, with a spacer between CoT & SCoT
+    { rank=same; legend; cot_input; spacer_top; scot_input }
+
+    // Invisible edge to enforce spacing between the two columns
+    cot_input -> spacer_top [style=invis, weight=50];
+    spacer_top -> scot_input [style=invis, weight=50];
+
+    // ===== Outcome notes moved to the bottom (replace blue boxes) =====
+
+    cot_note  [
+        label=<<B>Risks:</B><BR ALIGN="LEFT"/>Error Propagation<BR ALIGN="LEFT"/>No Validation>,
+        shape=box,
+        style="rounded,filled",
+        fillcolor="#ffebee",
+        color="#c62828",
+        width=2.5
+    ];
+
+    scot_note [
+        label=<<B>Advantages:</B><BR ALIGN="LEFT"/>Error Correction<BR ALIGN="LEFT"/>Execution-Based Ranking>,
+        shape=box,
+        style="rounded,filled",
+        fillcolor="#e8f5e9",
+        color="#2e7d32",
+        width=2.9
+    ];
+
+    // Attach notes directly under the execute nodes
+    cot_exec  -> cot_note  [style=dashed, color="#c62828", label="Outcome"];
+    scot_best -> scot_note [style=dashed, color="#2e7d32", label="Outcome"];
+
+    // Keep both notes on same final rank at the bottom
+    { rank=same; cot_note; scot_note }
+}

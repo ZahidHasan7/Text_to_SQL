@@ -1,0 +1,49 @@
+// Graphviz DOT representation of SCoT Text-to-SQL Pipeline
+// Render: dot -Tpng scot_pipeline.dot -o scot_pipeline.png
+
+digraph SCoT_Pipeline {
+    rankdir=LR;
+    node [shape=rectangle, style=filled, fillcolor=white, fontname="Helvetica"];
+
+    Q        [label="User Question", fillcolor="#ffffff"];
+    SCH      [label="DB Schema", shape=folder, fillcolor="#ffffff"];
+    PAT      [label="Pattern Library", shape=component, fillcolor="#ffffff"];
+
+    PGEN     [label="Plan Generation", fillcolor="#cce5ff", color="#3399ff"];
+    PCHECK   [label="Plan-Check Validation", shape=diamond, fillcolor="#ffe5cc", color="#ff9933"];
+    CGEN     [label="Pattern-Aware Candidate Generation", fillcolor="#cce5ff", color="#3399ff"];
+    SAN      [label="Pre-SQL Sanitization", fillcolor="#e6f2ff", color="#66b3ff"];
+    GBHAV    [label="GROUP BY / HAVING Validation", shape=diamond, fillcolor="#ffe5cc", color="#ff9933"];
+    SCHEMA_V [label="Schema Validation", shape=diamond, fillcolor="#ffe5cc", color="#ff9933"];
+    CANON    [label="Canonicalization", fillcolor="#e6f2ff", color="#66b3ff"];
+    EXEC     [label="Execution-Guided Ranking", fillcolor="#e0ccff", color="#9933ff"];
+    FINAL    [label="Final SQL Selection", fillcolor="#ccffcc", color="#33aa33"];
+
+    DISC1    [label="Pruned", shape=ellipse, fillcolor="#f2f2f2", color="#999999"];
+    DISC2    [label="Pruned", shape=ellipse, fillcolor="#f2f2f2", color="#999999"];
+    METRICS  [label="Execution Metrics", shape=note, fillcolor="#f9f0ff", color="#cc66ff"];
+
+    // Edges
+    Q -> PGEN;
+    SCH -> PGEN;
+    PAT -> PGEN;
+
+    PGEN -> PCHECK [label="plan"];
+    PCHECK -> CGEN  [label="valid"];
+    PCHECK -> PGEN  [label="invalid / regenerate", color="#cc0000"];
+
+    CGEN -> SAN     [label="4-7 candidates"];
+    SAN -> GBHAV;
+    GBHAV -> SCHEMA_V [label="valid"];
+    GBHAV -> DISC1    [label="invalid", color="#cc0000"];
+
+    SCHEMA_V -> CANON   [label="valid"];
+    SCHEMA_V -> DISC2   [label="invalid", color="#cc0000"];
+
+    CANON -> EXEC;
+    EXEC -> FINAL   [label="top score"];
+    EXEC -> METRICS [label="scores"];
+
+    SCH -> SCHEMA_V;
+    SCH -> EXEC;
+}

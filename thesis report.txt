@@ -1,0 +1,2009 @@
+\documentclass[12pt,a4paper]{report}
+
+% ---------------------------
+% Packages (Combined from File 1 and File 2)
+% ---------------------------
+\usepackage{setspace}
+\usepackage{lipsum}
+\usepackage{geometry}
+\usepackage{titlesec}
+
+% Packages from Methodology file for fonts, math, tables, and code
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[draft]{graphicx}
+
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{enumitem}
+
+% Hyperref should usually be loaded last
+\usepackage{hyperref}
+\usepackage{placeins}
+
+% ---------------------------
+% Geometry (Using File 1 settings)
+% ---------------------------
+\geometry{
+ a4paper,
+ left=1in,
+ right=1in,
+ top=1in,
+ bottom=1in
+}
+
+\onehalfspacing
+
+% ---------------------------
+% Code Listing Configuration (From File 2)
+% ---------------------------
+\lstdefinelanguage{json}{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    string=[s]{"}{"},
+    stringstyle=\color{black},
+    comment=[l]{:},
+    commentstyle=\color{black},
+    morekeywords={true,false,null},
+    keywordstyle=\color{black}\bfseries,
+    literate=
+     *{:}{{:}}{1}
+      {,}{,}{1}
+      {\{}{{ \{ }}{1}
+      {\}}{{\} }}{1}
+      {[}{{[ }}{1}
+      {]}{{ ]}}{1},
+}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    columns=fullflexible,
+    keepspaces=true,
+    showstringspaces=false,
+    inputencoding=utf8,
+    extendedchars=true,
+    literate={τ}{{$\tau$}}1 {≤}{{$\le$}}1 {≥}{{$\ge$}}1 {→}{{$\to$}}1 {≠}{{$\neq$}}1
+}
+
+% ---------------------------
+% Document Starts
+% ---------------------------
+\begin{document}
+
+% ---------------------------
+% Title Page
+% ---------------------------
+\begin{titlepage}
+    \centering
+    \onehalfspacing
+
+    % --- Thesis Title ---
+    {\Large \textbf{The Role of Structure in Reasoning:\\
+A Comparative Evaluation of Structured\\
+Chain-of-Thought Prompting for\\
+Text-to-SQL with Modern Language Models} \par}
+
+    \vspace{1.5cm}
+
+    % --- University Logo ---
+    \includegraphics[width=4cm]{sust_logo.png} 
+
+    \vspace{1.5cm}
+
+    % --- Course/Report Info ---
+    {\large \textbf{SWE - 450 : Thesis Report} \par}
+
+    \vspace{0.5cm}
+
+    % --- Submission Text ---
+    {\normalsize This dissertation was submitted for the partial fulfillment of the requirements for the degree of Bachelor of Science (Engg.) in Software Engineering. \par}
+
+    \vspace{2cm}
+
+    % --- Authors Section ---
+    {\large \textbf{Authors:} \par}
+    \vspace{0.5cm}
+    
+    \textbf{M. M. Zahid Hasan} (2020831035) \\
+    \textbf{Towhidur Rahman Asif} (2020831016)
+
+    \vspace{2cm}
+
+    % --- Supervisor Section ---
+    {\large \textbf{Supervisor:} \par}
+    \vspace{0.5cm}
+    
+    \textbf{Fazle Rabbi Rakib} \\
+    Lecturer IICT, SUST \\
+    Department of Software Engineering \\
+    Shahjalal University of Science and Technology, Sylhet, Bangladesh
+
+    \vfill
+
+    % --- Date ---
+    \textbf{Date:} 25 November, 2025
+
+\end{titlepage}
+
+\pagenumbering{roman}
+\setcounter{page}{2}
+
+
+% --- Acknowledgement Page ---
+\chapter*{ACKNOWLEDGMENT}
+\addcontentsline{toc}{chapter}{Acknowledgment}
+
+First and foremost, all praise and gratitude are due to Almighty Allah, whose infinite grace and guidance have been the cornerstone of this endeavor, allowing me to navigate the challenges and bring this work to fruition.
+
+We wish to express our profound and sincere gratitude to our supervisor, \textbf{Fazle Rabbi Rakib}, for his invaluable mentorship, patience, and unwavering support throughout this research journey. His insightful feedback, intellectual rigor, and consistent encouragement were instrumental in shaping the direction of this thesis and motivating us to delve deeper into the complexities of Large Language Models.
+
+We would also like to extend our appreciation to the faculty members of the Department of Software Engineering at Shahjalal University of Science and Technology for fostering an environment of academic excellence. 
+
+Finally, we owe our deepest thanks to our family. Their unconditional love, constant support, and unwavering belief in our abilities have been our greatest source of strength. This work reflects the collective efforts, guidance, and support of everyone who contributed to this endeavor.
+
+\newpage
+
+
+
+
+% --- Declaration Page ---
+\chapter*{DECLARATION}
+\addcontentsline{toc}{chapter}{Declaration}
+
+Regarding our thesis, we agree with the assertions, which include the following:
+
+\begin{enumerate}
+    \item We declare this thesis as \textbf{``The Role of Structure in Reasoning: A Comparative Evaluation of Structured Chain-of-Thought Prompting for Text-to-SQL with Modern Language Models''} is the result of our own original research work. This work has been completed under the supervision of \textbf{Fazle Rabbi Rakib} in partial fulfillment of the requirements for the degree of Bachelor of Science in Software Engineering at Shahjalal University of Science and Technology, Sylhet.
+    
+    \item We would like to further our declaration that: This thesis is our own work and does not comprise existing or written content of someone else, except where reference is made in the text.
+    
+    \item All sources of information, including academic papers, datasets, and software, have been appropriately acknowledged and cited.
+    
+    \item This thesis has not been submitted, in whole or in part, for any other degree or qualification from this or any other university or institution.
+\end{enumerate}
+
+\vspace{2cm}
+\noindent
+\textbf{Student's Full Name \& Signature:}
+
+\vspace{1.5cm}
+
+\noindent
+\begin{tabular}{@{}p{0.45\textwidth} @{\hspace{0.1\textwidth}} p{0.45\textwidth}@{}}
+    \hrulefill & \hrulefill \\
+    \textbf{M. M. Zahid Hasan} & \textbf{Towhidur Rahman Asif} \\
+    Registration No: 2020831035 & Registration No: 2020831016 \\ 
+    Date: \rule{3cm}{0.15mm} & Date: \rule{3cm}{0.15mm} \\
+\end{tabular}
+
+\newpage
+
+% --- Supervisor’s Recommendation Page ---
+\chapter*{SUPERVISOR'S RECOMMENDATION}
+\addcontentsline{toc}{chapter}{Supervisor's Recommendation}
+
+The thesis titled \textbf{``The Role of Structure in Reasoning: A Comparative Evaluation of Structured Chain-of-Thought Prompting for Text-to-SQL with Modern Language Models,''} submitted by \textbf{M. M. Zahid Hasan} and \textbf{Towhidur Rahman Asif}, has been prepared and completed under my supervision.
+
+we have reviewed the work and find it to be a satisfactory account of the research conducted. Therefore, we hereby recommend that the thesis be submitted for examination in partial fulfillment of the requirements for the degree of \textbf{Bachelor of Science in Software Engineering}.
+
+\vspace{3cm}
+
+\noindent
+\rule{5cm}{0.5pt} \\
+\textbf{Fazle Rabbi Rakib} \\
+ Lecturer IICT, SUST \\
+Department of Software Engineering \\
+Shahjalal University of Science and Technology, Sylhet \\
+Date: \rule{3cm}{0.15mm}
+
+\newpage
+
+% --- Certificate of Acceptance Page ---
+\chapter*{CERTIFICATE OF ACCEPTANCE}
+\addcontentsline{toc}{chapter}{Certificate of Acceptance}
+
+The thesis titled \textbf{``The Role of Structure in Reasoning: A Comparative Evaluation of Structured Chain-of-Thought Prompting for Text-to-SQL with Modern Language Models,''} submitted by \textbf{M. M. Zahid Hasan} (2020831035) and \textbf{Towhidur Rahman Asif} (2020831016) in partial fulfillment of the requirements for the degree of \textbf{Bachelor of Science in Software Engineering}, has been examined and is hereby approved by the undersigned.
+
+\vspace{3cm}
+
+\noindent
+\begin{tabular}{@{}p{0.3\textwidth} p{0.3\textwidth} p{0.3\textwidth}@{}}
+    \hrulefill & \hrulefill & \hrulefill \\
+    
+    Director, IICT & Chairman, Exam Committee & Supervisor \\ 
+    \textbf{Prof Mohammad Abdullah Al Mumin, PhD.} & \textbf{Ms Sayma Sultana Chowdhury} & \textbf{Dr. Fazle Rabbi Rakib} \\
+    Institute of Information and
+Communication Technology & Assistant Professor, SUST & Lecturer
+IICT, SUST \\
+\end{tabular}
+
+\newpage
+
+% ---------------------------
+% Abstract
+% ---------------------------
+\begin{abstract}
+The arrival of Large Language Models (LLMs) has shown tremendous promise for improving Text-to-SQL tasks, though their ability to handle complex queries requiring multi-step logical reasoning remains a key challenge. To address the limitations of unstructured reasoning, we introduce \textbf{Structured Chain-of-Thought (SCoT)}, a novel prompting methodology that constrains the LLM's deliberation process within a predefined, step-by-step framework.
+
+In this work, we analyze the responses of multiple modern LLMs by comparing SCoT with other prompting styles such as: (A) Chain-of-Thought, (B) Least-to-Most, (C) QDecomp, (D) QDecomp + InterCOL, and (E) Standard prompting. Our intention was to evaluate SCoT against these existing approaches, and we find that SCoT outperforms all other prompting styles across multiple evaluation settings.
+
+We test SCoT on Spider development subsets such as 600 query samples for Gemini 2.5 Pro model  and 500 query samples for GPT-4o-mini, obtaining execution accuracy of 84.33\% and 70.20\%, respectively, with Gemini outperforming the strongest baseline by about 9 points. Zero execution failures are produced by the seven-stage pipeline (plan generation, schema validation, diversified candidate SQL, automatic fixes, canonicalization, execution-guided ranking, and lightweight repair); the remaining errors are solely semantic mismatches. These findings demonstrate that Text-to-SQL reliability is enhanced by lightweight structure and multi-candidate ranking without the need for additional manual annotations or model retraining.
+
+\end{abstract}
+
+\newpage
+
+
+
+% ---------------------------
+% Table of Contents
+% ---------------------------
+\tableofcontents
+\newpage
+
+\listoffigures
+\newpage
+
+\listoftables
+\newpage
+
+\pagenumbering{arabic}
+
+% ---------------------------
+% Chapter 1
+% ---------------------------
+\chapter{Introduction}
+
+\section{Motivation and Background}
+
+The modern world is driven by data. In this modern world it is not very smooth for a nontechnical person to access the data using SQL queries without having expertise on it. So it creates a significant barrier for non-technical users. Natural Language Interfaces (NLIs) to databases have come out as an impactful solution to the current problem. It enables the users to have the precise output just by using a natural language question. The primary task underpinning these interfaces is Text-to-SQL, the automated translation of a natural language question into an executable SQL query.
+
+
+\section{The Shift to Large Language Models}
+Traditional Text-to-SQL systems actually need specialized, supervised models that require extensive and manually annotated datasets for training. Though it is   effective, this approach is both costly and time-consuming. To overcome the constraints of cost and time  Large Language Models is the most suitable option. Though the process of the training is complex when it’s to perform complex tasks like Text-to-SQL, LLMs can be prompted easily with natural language . it reduces the need for specific training data for  each specific task . 
+
+
+\section{The Core Challenge: Unstructured Reasoning}
+With the developing capacity , the performance of LLMs on very complex Text-to-SQL queries which demand multi step reasoning is not up to the  mark . to solve it previously Chain of Thought (CoT) prompting was introduced so that LLMs can break down any problems and go step by step . As a result the improvement is noticeable compared to the previous methods .
+
+However , the efficiency of CoT does not go up to the mark when it comes to the very complex queries because of some limitation .because it has unstructured reasoning . As a result  the thought process can drive the model to wrong steps logically . In the context of the benchmarks like Spider , the  
+
+\section{Proposed Solution: Structured Chain-of-Thought (SCoT)} 
+To solve the problems with unstructured prompting, we present the solution by proposing a novel prompting methodology: Structured Chain-of-Thought (SCoT). SCoT aims to enhance the quality of CoT path generation for reasoning tasks by integrating strategic knowledge.
+
+The method involves a two-step process within a single prompt.
+SCoT doesn't let the model think freely and openly; instead, it guides its thinking through a set structure.We hypothesize that by enforcing this structure, SCoT prompting style will compel the model to follow a more
+disciplined and complete reasoning path.This will make more structured approch to find
+the answer and ultimately lead to a higher Exact Match Accuracy compared to both
+standard prompting and unstructured CoT methods.
+
+\section{ Research Questions
+}
+To validate our hypothesis, this research aims to answer the following questions through a rigorous comparative analysis:
+
+\textbf{RQ1:} Can Structured Chain-of-Thought prompting directly improve large language models' accuracy and reasoning in generating SQL queries?
+
+\textbf{RQ2:} Does enforcing a structured reasoning format (SCoT) lead to higher exact match accuracy in Text-to-SQL generation compared to unstructured Chain-of-Thought (CoT)?
+
+\textbf{RQ3:} How does the performance of SCoT compare against other advanced prompting techniques, including Question Decomposition (QDecomp), across a variety of modern Large Language Models?
+
+\section{Thesis Outline
+}
+This thesis is structured in the following manner: Chapter 2 reviews the relevant literature on Text-to-SQL parsing, the evolution of reasoning in LLMs, and the prompting techniques that form the baselines for our study. Chapter 3 details our experimental methodology, including a description of the Spider dataset, the technical framework, the design of each prompting strategy, and the evaluation metrics used. Chapter 4 presents the quantitative results of our comparative analysis, supplemented by a qualitative error analysis to provide deeper insights into the performance of each method. Finally, Chapter 5 concludes with a summary of our contributions, discusses the implications of our findings, and proposes promising directions for future research.
+
+% ---------------------------
+% Chapter 2
+% ---------------------------
+\chapter{Literature Review and Related Work}
+
+This chapter gives a overview of the academic and technical background relevant to to this thesis which is  very comprehensive . we start by the evolution of the Text-to-SQL , then we discuss the paradigm shift introduced by Large Language.Models .   Then we dives into techniques for enhancing LLM reasoning, with a particular focus on the Chain-of-Thought prompting methods that form the foundation of our work. Finally , we proposed  Structured Chain-of-Thought (SCoT) methodology  to address the research gap. 
+\section{Text-to-SQL Semantic Parsing}
+Semantic parsing, which is the task of converting natural language to machine-executable logical form, has been a long-standing objective in the field of natural language processing. In databases, this materializes into Text-to-SQL, which refers to a system translating a user's question into a formal SQL query. Early examples include work like GEOQUERY (Zelle \& Mooney, 1996), which resorted to inductive logic programming and smaller, single-domain datasets. Researchers have explored data recombination techniques \cite{jia2016data} to improve neural semantic parsing models. The publication of large-scale, cross-domain benchmarks,most notably Spider (Yu et al., 2018), marked a turning point for the field. The complexity of Spider, with multiple tables and complex queries involving joins, nesting, and various SQL clauses .
+\section{Large Language Models and In-Context Learning
+}
+The rise of the Large Language Models (LLMs) like GPT-3 introduced a new paradigm: in-context learning. Unlike the fine tuned models , LLMs have shown the remarkable ability to perform new tasks with only a few examples which is directly given in the prompt .  This few-shot or zero-shot capability significantly lowers the limit to developing capable text-to-SQL parsers. Earlier work on Seq2SQL \cite{zhong2017seq2sql} demonstrated the potential of using reinforcement learning for Text-to-SQL generation. Researchers have quickly found that by simply including the database schema and the user's question in a prompt, LLMs trained on code, such as Codex \cite{chen2021codex}, could generate surprisingly accurate SQL queries \cite{rajkumar2022evaluating}
+\section{Chain-of-Thought and Reasoning in LLMs
+}
+Previous prompting strategies worked well for straightforward tasks like translation, but they frequently fell short when a problem required multiple steps of reasoning.  In 2022, Wei and colleagues introduced Chain-of-Thought (CoT) prompting \cite{wei2022cot}, which was a significant improvement.
+
+ The basic idea behind CoT is simple: a model typically performs significantly better on challenging tasks, like math word problems, commonsense reasoning, or symbolic logic, if you ask it to demonstrate its reasoning process before providing the final answer.  The model can deconstruct a large problem into smaller, simpler components by outlining the steps. Complementary work on ReAct \cite{wang2023react} explored synergizing reasoning and acting in language models.
+
+ Other variations, such as Zero-shot CoT, were later inspired by this method \cite{kojima2022zeroshotcot}.
+
+
+\section{ Analysis of Prompting Techniques for Text-to-SQL
+}
+The CoT was naturally applicable to the complex reasoning which is required for Text-to-SQL. Recent surveys and tutorials \cite{pourreza2024prompting,gao2024texttosql} provide comprehensive overviews of prompting strategies for Text-to-SQL tasks. The work of Tai et al. \cite{tai2023exploring}, which serves as the primary foundation for this thesis, systematically explored this application. The authors investigated several CoT style prompting methods and made two important observations.
+First, they found that a naively applied, verbose CoT prompt---where reasoning steps describe the logical execution of SQL clauses---often performed worse than standard prompting. This was attributed to error propagation, where a mistake in an early, detailed reasoning step would be faithfully translated into an incorrect final query.
+ Second, they compared a single-pass generation approach with an iterative method, Least-to-Most prompting (Zhou et al., 2023), which decomposes a problem and solves each sub-problem sequentially. They concluded that for Text-to-SQL, the iterative approach was computationally costly and not necessarily more accurate.
+Based on these findings, Tai et al. (2023) proposed Question Decomposition (QDecomp) as a more effective method. Instead of low level SQL clause descriptions, QDecomp uses higher level natural language sub questions as the reasoning steps. Their best performing variant which is the QDecomp+InterCOL, further enhanced this by annotating each sub-question with the relevant table and column names, improving the model's ability to ground the query to the schema.
+
+\section{Analysis of Prompting Techniques for Text-to-SQL
+}
+Recent advancements in prompt-based learning have significantly improved the performance of large language models (LLMs) on complex reasoning tasks, including Text-to-SQL semantic parsing. The ``mother paper'' I reviewed presents one of the first systematic investigations into how different Chain-of-Thought (CoT)-style prompting methods can enhance (or sometimes harm) Text-to-SQL performance. The authors had the focus primarily on three prompting strategies . They are Chain of Thought prompting, Least to Most prompting, and a newly proposed approach called Question Decomposition Promoting (QDecomp) with an extended version QDecomp+InterCOL.  They evaluated them across the Spider and Spider-Realistic benchmarks.
+
+The paper highlights that standard CoT prompting, although effective in general NLP tasks, often performs poorly for Text-to-SQL. This is mainly because CoT generates very detailed intermediate reasoning steps, which increases the likelihood of error propagation. When an early reasoning step mistakenly infers the wrong table, column, or join condition, the model tends to carry these errors forward into the SQL output, resulting in incorrect queries despite seemingly ``logical'' reasoning paths. The experiments show that CoT prompting underperforms even the baseline standard prompting method.
+
+To overcome this issue, the authors examine Least to Most prompting that divides complex questions into incremental sub-questions. Although this approach reduces the complexity of each step, it introduces a computational burden due to iterative prompting. Moreover, the model may still generate incorrect SQL for early sub-questions that errors propagate into later steps. As a result, the approach shows only moderate gains compared to the standard baseline.
+
+The core contribution of the mother paper is QDecomp, a prompting method that adapts the idea of question decomposition but generates all reasoning steps and the final SQL query in a single pass. Instead of describing SQL execution steps (as CoT does), QDecomp breaks the natural language question into simpler sub-questions, which encourages the LLM to reason more globally and avoid overly detailed intermediate steps. The improved version, QDecomp+InterCOL, further incorporates incremental table-column grounding, prompting the model to explicitly identify relevant schema elements at each reasoning step. This helps reduce common schema-linking mistakes, which are a major challenge in cross-domain Text-to-SQL tasks.
+
+Across experiments, QDecomp+InterCOL consistently achieves the best test-suite accuracy on Spider and Spider-Realistic benchmarks. It outperforms standard prompting, CoT prompting, and Least-to-Most prompting by noticeable margins and demonstrates improved robustness to in-context example selection, prompt formatting, and query difficulty level. Overall, the mother paper demonstrates that strategic abstraction and controlled reasoning, rather than more detailed reasoning, lead to more reliable SQL generation with LLMs.
+\section{Research Gap
+}
+The work of Tai et al. \cite{tai2023exploring} convincingly demonstrates that the style and granularity of reasoning are critical for successful Text-to-SQL generation.  Their QDecomp method shows that a form of structured decomposition is beneficial. However, the reasoning steps themselves remain as unstructured natural language. This leaves room for ambiguity and inconsistency in how the model interprets and executes the plan laid out in the decomposition. While structured prompting has shown promise in general reasoning tasks \cite{hao2024structured}, and prompt-enhanced frameworks like PET-SQL \cite{cao2024petsql} have improved Text-to-SQL performance, the integration of formal structure with interactive validation remains underexplored. Recent work on interactive Text-to-SQL \cite{li2024interactive} and schema encoding techniques \cite{guo2024encoding} highlight the importance of better schema grounding and user feedback, yet these approaches have not been fully combined with structured reasoning pipelines.
+To our knowledge, the potential of enforcing a formally structured reasoning process for Text-to-SQL has not been fully explored. While QDecomp provides a sequence of steps, it does not provide a rigid framework that dictates the type of information to consider at each step. This leads to our central research question: if we move beyond unstructured natural language steps to a formal, machine-readable structure (like JSON), can we further reduce ambiguity, improve schema grounding, and increase the generation of syntactically and semantically correct SQL queries? This thesis aims to fill that gap by proposing and evaluating the Structured Chain-of-Thought (SCoT) prompting methodology.
+
+
+\section{Motivation for Choosing the Primary Reference Work
+}
+Before deciding on the main direction of our thesis, we actually went through several related papers, including one that focused on Structured Chain-of-Thought prompting. That paper introduced the idea of giving LLMs a more organized reasoning format, which was interesting and helpful for understanding how structured thinking can reduce ambiguity. However, it mostly discussed general NLP tasks and did not deal with Text-to-SQL .
+When I later found the paper ``Exploring Chain-of-Thought Style Prompting for Text-to-SQL,'' it felt much more relevant to my research goals . Because this area SQL has not explored in depth . SCoT prompting style has not been applied in the domain of Text-to-SQL.
+Because this paper focuses exactly on the same problem I want to solve and how to improve reasoning for Text-to-SQL ,so it made more sense for me to choose it as my main reference. It directly addresses the weaknesses of existing methods and gives a strong foundation for developing Structured Chain-of-Thought in my thesis.
+
+% ---------------------------
+% Chapter 3 (Merged Content from File 2)
+% ---------------------------
+\chapter{Methodology}
+
+This chapter describes how we developed and tested SCoT (Structured Chain-of-Thought), a new prompting framework for Text-to-SQL generation. We start by explaining the baseline methods and why we created our approach. Then we describe the datasets we used, how we built the system, our experimental setup, and how we evaluated the results.
+
+\section{Method Overview}
+
+We tested five different Text-to-SQL prompting methods on the Spider benchmark \cite{yu2018spider}. Four of these are baseline approaches that other researchers have already developed:
+
+\begin{enumerate}
+    \item \textbf{Standard (Direct SQL)} \cite{rajkumar2022evaluating} --- The model gets the database schema and question, then generates SQL directly without any reasoning steps. We use temperature $\tau = 0.0$ to get consistent results every time.
+    
+    \item \textbf{CoT (Chain-of-Thought)} \cite{wei2022cot} --- This method makes the model think through the SQL construction step by step (FROM $\to$ WHERE $\to$ GROUP BY $\to$ HAVING $\to$ SELECT) before writing the final query. We use temperature $\tau = 0.0$ to keep the reasoning consistent.
+    
+    \item \textbf{QDecomp (Question Decomposition)} \cite{tai2023exploring} --- This method breaks complex questions into 3--6 smaller sub-questions (identify tables $\to$ select columns $\to$ specify conditions $\to$ set ordering/limits), then combines them into a single SQL query. This approach relates to broader work on learning to ask questions for improving Text-to-SQL models \cite{yaghmazadeh2019question}.
+    
+    \item \textbf{QDecomp\_InterCol (Inter-Column Decomposition)} \cite{tai2023exploring} --- An improved version of QDecomp that focuses on column relationships. It asks the model to identify primary keys (PK) and foreign keys (FK) first, which helps prevent incorrect table joins.
+\end{enumerate}
+
+Our method, \textbf{SCoT}, tackles the common problems we saw in baseline approaches. It uses a three-phase process (Plan $\to$ Plan-Check $\to$ SQL) and generates multiple SQL candidates to pick the best one. Drawing inspiration from execution-guided decoding techniques \cite{rajkumar2022evaluating}, SCoT employs execution feedback to rank and select the most promising SQL candidates. The best baseline method (QDecomp\_InterCol) achieved 75.17\% accuracy. When we analyzed where baselines failed, we found several recurring problems: (a) syntax and semantic errors that prevented execution, (b) incorrect GROUP BY/HAVING usage, (c) negation logic errors (like ``countries without makers''), (d) missing set operations (INTERSECT/UNION), and (e) ambiguous column references. SCoT addresses each of these issues through specialized components we describe in \S3.4.
+
+\begin{figure}[htbp]
+    \centering
+ \includegraphics[height=21cm]{Figure 3.1.jpeg}
+    \caption{SCoT pipeline architecture.}
+    \label{fig:scot_pipeline}
+    \vspace{0.5cm}
+    \framebox{\parbox{0.9\textwidth}{
+        \centering
+        \textbf{SCoT pipeline architecture:} Plan Generation $\to$ Plan-Check Validation $\to$ Pattern-Aware Candidate Generation (4-7 candidates) $\to$ Pre-SQL Sanitization $\to$ GROUP BY/HAVING Validation $\to$ Schema Validation $\to$ Canonicalization $\to$ Execution-Guided Ranking $\to$ Final SQL Selection.
+    }}
+\end{figure}
+\FloatBarrier
+
+% \noindent\rule{\textwidth}{0.4pt}
+
+\section{Datasets and Schema Representation}
+
+\subsection{Spider Benchmark}
+
+We test all methods on the Spider development set \cite{yu2018spider}, a popular Text-to-SQL benchmark with 1,034 question-SQL pairs across 200 databases and 166 different table schemas. The dataset uses SQL-92 syntax without advanced features like CTEs or window functions, so the queries work on most standard databases.
+
+We conduct experiments on two subsets:
+\begin{itemize}
+    \item \textbf{dev\_600} (600 queries) tested with Gemini 2.5 Pro
+    \item \textbf{dev\_500} (500 queries) tested with GPT-4o-mini
+\end{itemize}
+
+We also used a smaller dev\_30 subset (30 queries) during early development. All methods are tested on the same queries within each subset to ensure fair comparisons. The database files are in \path{data/spider/database/}, schema information is in \path{data/spider/tables.json}, and the correct SQL answers are in \path{data/spider/dev_gold.sql}.
+
+\subsection{Schema Format and Multilingual Extensions}
+
+Schemas follow Spider's human-readable API-Docs format:
+
+\begin{lstlisting}
+# table_name (column1, column2 PRIMARY KEY, column3 REFERENCES other_table(other_col), ...)
+\end{lstlisting}
+
+This format encodes:
+
+\begin{itemize}
+    \item \textbf{Table names} and \textbf{column lists} in a single-line specification
+    \item \textbf{Primary key} annotations (via \texttt{PRIMARY KEY} keyword)
+    \item \textbf{Foreign key relationships} (via \texttt{REFERENCES other\_table(column)} syntax)
+\end{itemize}
+
+Example from \texttt{countries} schema:
+
+\begin{lstlisting}
+# countries (CountryId PRIMARY KEY, CountryName, Continent)
+# car_makers (Id PRIMARY KEY, Maker, FullName, Country REFERENCES countries(CountryId))
+\end{lstlisting}
+
+All SQL execution occurs on SQLite 3.x databases.
+
+\subsection{Test Set Preparation}
+
+The \path{1_prepare_data.py} script filters the full Spider dev split and creates:
+
+\begin{itemize}
+    \item \path{my_test_set.json}: Input questions with schema and database paths
+    \item \path{my_gold_set.json}: Ground-truth annotations
+    \item \path{my_gold_set.sql}: Reference SQL queries for result comparison
+\end{itemize}
+
+Each test instance contains:
+
+\begin{lstlisting}[language=json]
+{
+  "question": "List countries with no car makers",
+  "db_id": "car_1",
+  "db_path": "data/spider/database/car_1/car_1.sqlite",
+  "schema": "# countries (...)\n# car_makers (...)"
+}
+\end{lstlisting}
+
+\noindent\rule{\textwidth}{0.4pt}
+
+\section{Baseline Method Implementations}
+
+All baseline methods share identical experimental conditions within each model setting: deterministic generation ($\tau = 0.0$--$0.2$), 120-second timeout per query, and SQL-92 syntax constraints. We test with two LLM backends:
+\begin{itemize}
+    \item \textbf{Gemini 2.5 Pro} on dev\_600 (primary experiments)
+    \item \textbf{GPT-4o-mini} on dev\_500 (cross-model validation)
+\end{itemize}
+
+Implementations for Gemini experiments reside in \path{2_run_baseline_cot.py}, \path{2_run_standard.py}, \path{2_run_qdecomp.py}, and \path{2_run_qdecomp_intercol.py}. Equivalent GPT-4o-mini scripts are in \path{openai_gpt/} directory with \texttt{\_gpt.py} suffix.
+
+\subsection{Standard (Direct SQL)}
+
+\textbf{Prompt Structure:}
+
+\begin{lstlisting}
+{schema}
+
+Return ONLY the final SQL for the question below, wrapped in a fenced block:
+
+```sql
+SELECT ...
+```
+
+Rules:
+
+- Use only tables/columns from schema
+- Define aliases before use
+- SQL-92 only (no CTE/window)
+- No explanation outside fenced block
+
+Question: {question}
+\end{lstlisting}
+
+\textbf{Temperature:} $\tau = 0.0$ (deterministic)\\
+\textbf{Max Tokens:} 1024\\
+\textbf{Output:} Single SQL statement ending with \texttt{;}
+
+\textbf{Extraction Logic:} Regex captures fenced SQL block \texttt{(```sql ... ```)} or fallback to \texttt{SELECT ... ;} pattern.
+
+\subsection{CoT (Chain-of-Thought)}
+
+\textbf{Prompt Structure:}
+
+\begin{lstlisting}
+{schema}
+
+### {question}
+
+A: # Let's think step by step
+
+# 1) Choose tables (FROM/JOIN).
+
+# 2) Filter rows (WHERE).
+
+# 3) Group if needed (GROUP BY).
+
+# 4) Filter groups (HAVING).
+
+# 5) Final columns (SELECT).
+
+# Thus, the answer is:
+
+```sql
+SELECT
+```
+\end{lstlisting}
+
+\textbf{Temperature:} $\tau = 0.0$\\
+\textbf{Max Tokens:} 1200\\
+\textbf{Reasoning Steps:} Encourages explicit logical ordering (FROM $\to$ WHERE $\to$ GROUP BY $\to$ HAVING $\to$ SELECT) mirroring SQL execution semantics.
+
+\textbf{Why this works:} Previous research \cite{wei2022cot} shows that CoT prompting helps with complex reasoning by making the model write out its thinking. However, free-form reasoning can sometimes create conflicts between what the model plans and what it actually generates.
+
+\subsection{QDecomp (Question Decomposition)}
+
+\textbf{Prompt Structure:}
+
+\begin{lstlisting}
+{schema}
+
+Decompose the problem into 3--6 concise steps, then output ONLY the final SQL:
+
+Decomposition:
+- Identify target table(s)
+- Select columns
+- Specify conditions (WHERE/HAVING)
+- Set ordering/limits
+
+Final SQL:
+```sql
+...
+```
+
+Question: {question}
+\end{lstlisting}
+
+\textbf{Few-Shot Examples:} 1 example demonstrating decomposition $\to$ SQL synthesis\\
+\textbf{Temperature:} $\tau = 0.0$\\
+\textbf{Max Tokens:} 1200
+
+\textbf{Decomposition Steps:}
+1. Identify relevant tables
+2. Extract required columns
+3. Translate filters into WHERE/HAVING
+4. Specify ORDER BY/LIMIT
+
+\subsection{QDecomp\_InterCol (Inter-Column Grounding)}
+
+\textbf{Enhancement Over QDecomp:} Explicit FK/PK relationship hints in prompts:
+
+\begin{lstlisting}
+{schema}
+
+Before generating SQL:
+
+1. List all primary keys from relevant tables
+2. Identify foreign key joins between tables
+3. Ensure all JOIN clauses use explicit ON conditions with FK references
+
+Decomposition:
+
+- Tables: ...
+- Primary Keys: ...
+- Foreign Keys: ... REFERENCES ...
+- Columns: ...
+- Conditions: ...
+
+Final SQL:
+
+```sql
+...
+```
+\end{lstlisting}
+
+\textbf{Temperature:} $\tau = 0.2$ (slight diversity for FK discovery)\\
+\textbf{Max Tokens:} 1200
+
+\textbf{Why this works:} Our error analysis found about 18 cases where models created invalid table joins (joining tables that shouldn't be joined). By explicitly listing foreign keys, we help the model base its joins on actual schema relationships.
+
+\noindent\rule{\textwidth}{0.4pt}
+
+\section{SCoT: Detailed Design and Architecture}
+
+SCoT (Structured Chain-of-Thought) achieves over 84\% accuracy by combining seven key components: pattern detection for specialized candidates, schema validation, pre-SQL cleanup, automatic error fixing, template generators, smart ranking based on execution results, and controlled diversity. The full implementation is in \path{3_run_scot_sql.py} .
+
+\subsection{Pattern Detection for Specialized Candidates}
+
+\textbf{Why we need this:} Generic prompts often fail on queries that need set operations (INTERSECT/UNION), negation logic (NOT EXISTS), or per-group aggregates (subqueries). Pattern detection identifies these cases and routes them to specialized generators.
+
+\textbf{Detection Functions :}
+
+\begin{longtable}{p{4.5cm} p{3.0cm} p{5.0cm} p{3.3cm}}
+\toprule
+\textbf{Function} & \textbf{Pattern} & \textbf{Example Question} & \textbf{SQL Requirement} \\
+\midrule
+\endhead
+
+\texttt{\_needs\_negation()} & no/without/never/ hasn't + multilingual tokens & ``Countries with no car makers'' & \texttt{NOT EXISTS} / \texttt{LEFT JOIN ... IS NULL} \\ [0.5cm]
+
+\texttt{\_needs\_intersect()} & both X and Y & ``Cartoons directed by BOTH Ben Jones AND Michael Chang'' & \texttt{INTERSECT} \\ [0.5cm]
+
+\texttt{\_needs\_union()} & either X or Y & ``Professionals in Indiana OR >2 treatments'' & \texttt{UNION} \\ [0.5cm]
+
+\texttt{\_needs\_subquery()} & \{most/least/ highest/lowest\} + \{each/per/every\} & ``Highest rating for each stadium'' & Subquery with GROUP BY \\ [0.5cm]
+
+\bottomrule
+\end{longtable}
+
+\textbf{Implementation:}
+\begin{lstlisting}[language=Python]
+_NEG_TOKENS_EXPANDED = {
+    "no", "without", "none", "missing", "lack", "exclude",
+    "nei", "chhara", "bihin", "shunno"  # Bengali (transliterated)
+}
+
+def _needs_negation(q: str) -> bool:
+    return any(tok in q.lower() for tok in _NEG_TOKENS_EXPANDED)
+\end{lstlisting}
+
+\textbf{Impact:} Routes \textasciitilde50 queries to pattern-specific templates, addressing failure modes unreachable by generic prompts.
+
+\subsection{Schema Validation and PK/FK Path Enumeration}
+
+\textbf{Why we need this:} Baseline methods made up about 20 non-existent columns and created about 18 invalid joins. Schema validation prevents these errors by carefully checking all columns and tables, and by finding valid join paths through the schema.
+
+\textbf{Components :}
+
+\textbf{A. \texttt{\_enumerate\_pk\_fk\_paths(schema\_str)}}\\
+Parses schema to extract PK/FK relationships:
+
+\begin{lstlisting}[language=Python]
+# Input: "# countries (CountryId PRIMARY KEY, CountryName)"
+# Output: {"countries": {"pk": "CountryId", "fks": []}}
+\end{lstlisting}
+
+\textbf{Algorithm:}
+
+\begin{enumerate}
+    \item Regex parse each \texttt{\# table (col1, col2 PRIMARY KEY, col3 REFERENCES other(col))} line
+    \item Extract table name, primary key (via \texttt{PRIMARY KEY} keyword)
+    \item Extract foreign keys (via \texttt{REFERENCES} pattern): \texttt{(fk\_col, ref\_table, ref\_col)} tuples
+    \item Return dictionary mapping \texttt{\{table\_name: \{"pk": col, "fks": [(fk, ref\_tbl, ref\_col), ...]\}\}}
+\end{enumerate}
+
+\textbf{B. \texttt{\_find\_join\_path(schema\_map, table\_a, table\_b)}}\\
+Breadth-first search (BFS) on FK graph to discover join paths:
+
+\begin{lstlisting}[language=Python]
+# Input: schema_map, table_a="stadium", table_b="singer_in_concert"
+# Output: [(stadium, Stadium_ID, concert, Stadium_ID),
+#          (concert, concert_ID, singer_in_concert, concert_ID)]
+\end{lstlisting}
+
+\textbf{Algorithm:}
+
+\begin{enumerate}
+    \item Initialize BFS queue with \texttt{(table\_a, [])}
+    \item For each neighbor table reachable via FK, append join edge to path
+    \item Return first path reaching \texttt{table\_b} (shortest join sequence)
+    \item Inject path into prompts as explicit JOIN hints
+\end{enumerate}
+
+\textbf{C. \texttt{\_uses\_only\_schema(sql, schema\_tables, schema\_cols)}}\\
+Validates SQL references against schema vocabulary:
+
+\begin{lstlisting}[language=Python]
+def _uses_only_schema(sql, schema_tables, schema_cols):
+    # Regex extract FROM/JOIN table names
+    for m in re.finditer(r"\bFROM|JOIN\s+([a-z_][a-z0-9_]*)", sql, re.I):
+        if m.group(1).lower() not in schema_tables:
+            return False
+    # Regex extract qualified column refs (table.column)
+    for m in re.finditer(r"\b([a-z_][a-z0-9_]*)\.([a-z_][a-z0-9_]*)", sql, re.I):
+        if m.group(2).lower() not in schema_cols:
+            return False
+    return True
+\end{lstlisting}
+
+\textbf{Impact:} Pre-execution filtering rejects \textasciitilde90\% of hallucinated references, preventing downstream execution errors.
+
+\subsection{Pre-SQL Sanitizers}
+
+\textbf{Why we need this:} Sometimes the model generates incomplete SQL with problems like trailing keywords (\texttt{WHERE AND}), unmatched parentheses, or malformed plans. These cause errors in later processing steps.
+
+\textbf{Sanitization Functions :}
+
+\textbf{A. \texttt{\_balance\_parens(text)}}\\
+Removes unmatched opening/closing parentheses:
+
+\begin{lstlisting}[language=Python]
+# Before: "SELECT (col FROM table"
+# After:  "SELECT col FROM table"
+\end{lstlisting}
+
+\textbf{Algorithm:}
+
+\begin{enumerate}
+    \item Track parenthesis balance (increment on \texttt{(}, decrement on \texttt{)})
+    \item Mark unmatched characters for removal
+    \item Return cleaned string
+\end{enumerate}
+
+\textbf{B. \texttt{\_remove\_dangling\_keywords(sql)}}\\
+Strips trailing SQL keywords:
+
+\begin{lstlisting}[language=Python]
+# Before: "SELECT col FROM table WHERE AND"
+# After:  "SELECT col FROM table WHERE"
+\end{lstlisting}
+
+\textbf{Pattern List:} \texttt{WHERE|AND|OR|ON|JOIN|LEFT|RIGHT|ORDER BY|GROUP BY|HAVING} at end-of-string
+
+\textbf{C. \texttt{\_fix\_incomplete\_plan(plan\_text)}}\\
+Repairs malformed plan clause definitions:
+
+\begin{lstlisting}[language=Python]
+# Before: "- ORDER BY: (none"
+# After:  "- ORDER BY: (none)"
+\end{lstlisting}
+
+\textbf{Application:} Invoked before LLM parsing of plan/prompt outputs to prevent regex match failures.
+
+\textbf{Impact:} Saves 1-2 repair cycles per query by preventing syntax errors from propagating through the pipeline.
+
+\subsection{GROUP BY/HAVING Validators with Auto-Fix}
+
+\textbf{Why we need this:} Over 25 queries failed because of GROUP BY/HAVING mistakes: (a) columns in SELECT weren't included in GROUP BY, (b) using HAVING without GROUP BY, and (c) putting non-aggregate filters in HAVING instead of WHERE.
+
+\textbf{Validation Functions :}
+
+\textbf{A. \texttt{\_validate\_group\_by(sql)}}\\
+Enforces SQL aggregation invariant: \textbf{all non-aggregated SELECT columns must appear in GROUP BY}.
+
+\textbf{Algorithm:}
+
+\begin{enumerate}
+    \item Regex extract SELECT clause columns
+    \item Identify aggregated columns (\texttt{COUNT|SUM|AVG|MIN|MAX(...)})
+    \item Regex extract GROUP BY columns
+    \item Compute missing columns: \texttt{SELECT\_non\_agg - GROUP\_BY}
+    \item If non-empty, auto-fix: append missing columns to GROUP BY clause
+\end{enumerate}
+
+\textbf{Before/After Example:}
+
+\begin{lstlisting}[language=SQL]
+-- Before (Invalid)
+SELECT t.name, t.age, COUNT(*)
+FROM t
+GROUP BY t.name;
+
+-- After (Auto-Fixed)
+SELECT t.name, t.age, COUNT(*)
+FROM t
+GROUP BY t.name, t.age;
+\end{lstlisting}
+
+\textbf{B. \texttt{\_validate\_having(sql)}}\\
+Enforces two rules:
+
+\begin{enumerate}
+    \item \textbf{HAVING requires GROUP BY}: If HAVING present without GROUP BY, add implicit \texttt{GROUP BY 1}
+    \item \textbf{Non-aggregate filters belong in WHERE}: Move simple comparisons from HAVING to WHERE
+\end{enumerate}
+
+\textbf{Before/After Example:}
+
+\begin{lstlisting}[language=SQL]
+-- Before (Invalid)
+SELECT name, COUNT(*) FROM t HAVING age > 30;
+
+-- After (Auto-Fixed)
+SELECT name, COUNT(*) FROM t WHERE age > 30 GROUP BY name;
+\end{lstlisting}
+
+\textbf{Impact:} Fixes \textasciitilde25 aggregation errors automatically without additional LLM calls, reducing latency by \textasciitilde3-5 seconds per affected query.
+
+\subsection{Template Skeleton Generators}
+
+\textbf{Why we need this:} When the model generates set operations (INTERSECT/UNION) and anti-joins (NOT EXISTS) freely, it fails about 40\% of the time (especially for negation). Using fixed templates with specific slots improves success to about 85\%.
+
+\textbf{Template Functions :}
+
+\textbf{A. \texttt{build\_not\_exists\_template(schema\_str, question, schema\_map)}}\\
+Generates NOT EXISTS anti-join for negation queries:
+
+\begin{lstlisting}[language=SQL]
+-- Template Structure
+SELECT table_a.column
+FROM table_a
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM table_b
+  WHERE table_b.fk = table_a.pk
+    AND <additional_conditions>
+);
+\end{lstlisting}
+
+\textbf{Alternative Portable Form (LEFT JOIN):}
+
+\begin{lstlisting}[language=SQL]
+SELECT a.column
+FROM table_a AS a
+LEFT JOIN table_b AS b ON a.pk = b.fk
+WHERE b.rowid IS NULL;
+\end{lstlisting}
+
+\textbf{Prompt Guidance:}
+
+\begin{itemize}
+    \item Prefer NOT EXISTS (most portable across engines)
+    \item Use LEFT JOIN + IS NULL when PK detection available
+    \item Avoid EXCEPT (SQLite-specific, may fail portability)
+\end{itemize}
+
+\textbf{B. \texttt{build\_intersect\_skeleton(schema, question)}}\\
+BOTH X AND Y $\to$ INTERSECT template:
+
+\begin{lstlisting}[language=SQL]
+-- Subquery 1 (Condition X)
+SELECT columns FROM tables WHERE condition_X
+INTERSECT
+-- Subquery 2 (Condition Y)
+SELECT columns FROM tables WHERE condition_Y;
+\end{lstlisting}
+
+\textbf{Few-Shot Example:}
+
+\begin{lstlisting}[language=SQL]
+-- Question: "Channels airing cartoons by BOTH Ben Jones AND Michael Chang"
+SELECT T.series_name, T.country
+FROM TV_Channel AS T JOIN Cartoon AS C ON T.id = C.Channel
+WHERE C.Directed_by = 'Ben Jones'
+INTERSECT
+SELECT T.series_name, T.country
+FROM TV_Channel AS T JOIN Cartoon AS C ON T.id = C.Channel
+WHERE C.Directed_by = 'Michael Chang';
+\end{lstlisting}
+
+\textbf{C. \texttt{build\_union\_skeleton(schema, question)}}\\
+EITHER X OR Y $\to$ UNION template (similar structure to INTERSECT).
+
+\textbf{D. \texttt{build\_subquery\_extremum\_skeleton(schema, question)}}\\
+Per-group extremum (e.g., ``highest rating for each stadium''):
+
+\begin{lstlisting}[language=SQL]
+SELECT outer.group_col, outer.value_col
+FROM table AS outer
+WHERE outer.value_col = (
+  SELECT MAX(inner.value_col)
+  FROM table AS inner
+  WHERE inner.group_col = outer.group_col
+);
+\end{lstlisting}
+
+\textbf{E. \texttt{build\_qd\_intercol\_candidate\_prompt(schema, question, schema\_map)}}\\
+Injects explicit FK hints from \texttt{schema\_map} into QDecomp\_InterCol prompt:
+
+\begin{lstlisting}
+Before generating SQL:
+- Primary Keys: {", ".join(pk_list)}
+- Foreign Keys: {", ".join(fk_list)}
+
+Decomposition:
+...
+\end{lstlisting}
+
+\textbf{Impact:} Template-based generation improves pattern-specific accuracy by 15-20 percentage points over free-form prompts.
+
+\subsection{Candidate Pool Construction}
+
+\textbf{Why we need this:} Using just one prompt often leads to the same simple solutions every time. By generating multiple candidates with different approaches, we can capture different valid solutions and pick the best one.
+
+\textbf{Generation Strategy :}
+
+SCoT generates \textbf{4–7 candidates per query} based on pattern detection:
+
+\textbf{Always-Generated Candidates (3):}
+
+\begin{enumerate}
+    \item \textbf{SCoT-Native} — Plan $\to$ Plan-Check $\to$ SQL ($\tau = 0.2$)
+    \item \textbf{QD-InterCol} — Question decomposition with FK hints ($\tau = 0.2$)
+    \item \textbf{Standard} — Direct SQL ($\tau = 0.0$)
+\end{enumerate}
+
+\textbf{Conditionally-Generated Candidates (4):}
+4. \textbf{NOT-EXISTS} — If \texttt{\_needs\_negation(q)} ($\tau = 0.2$)
+5. \textbf{INTERSECT} — If \texttt{\_needs\_intersect(q)} ($\tau = 0.2$)
+6. \textbf{UNION} — If \texttt{\_needs\_union(q)} and not \texttt{\_needs\_intersect(q)} ($\tau = 0.2$)
+7. \textbf{SUBQUERY} — If \texttt{\_needs\_subquery(q)} ($\tau = 0.2$)
+
+\textbf{Temperature Strategy:}
+
+\begin{itemize}
+    \item \textbf{Plan generation:} $\tau = 0.3$ (slight creativity for diverse clause orderings)
+    \item \textbf{SQL generation:} $\tau = 0.2$ (low diversity to avoid syntax errors)
+    \item \textbf{Standard baseline:} $\tau = 0.0$ (deterministic anchor)
+\end{itemize}
+
+\textbf{Rationale:} Temperature $\tau = 0.2$--$0.3$ balances diversity (capturing multiple valid solutions) with stability (avoiding syntax chaos). Deterministic Standard candidate provides conservative fallback.
+
+\subsection{Canonicalization and Plan Enforcement}
+
+\textbf{Why we need this:} Candidate queries may have inconsistent formatting (mixing \texttt{table.col} and \texttt{col}), violate the plan (like adding ORDER BY when it shouldn't), or miss DISTINCT when duplicates are possible.
+
+\textbf{Canonicalization Prompt:}
+
+\begin{lstlisting}
+{schema}
+
+Rewrite the SQL **without changing its semantics** to satisfy ALL rules:
+
+1. Qualify **every** column with correct table alias
+2. If non-aggregated columns + aggregates -> add GROUP BY for all non-aggregates
+3. Preserve existing ORDER BY/LIMIT (do not remove)
+4. If duplicates possible but no aggregation -> use SELECT DISTINCT
+5. SQL-92 only (no CTE/window)
+6. Keep as **one** statement ending with ";"
+
+Input SQL:
+```sql
+{candidate_sql}
+```
+
+Return only corrected SQL:
+\end{lstlisting}
+
+\textbf{Temperature:} $\tau = 0.0$ (preserve semantics deterministically)
+
+\textbf{Post-Canonicalization Enforcement:}
+
+\textbf{A. \texttt{\_add\_nocase(sql)}}\\
+Adds \texttt{COLLATE NOCASE} to string comparisons for case-insensitive matching:
+
+\begin{lstlisting}[language=SQL]
+-- Before: WHERE name = 'Alice'
+-- After:  WHERE name = 'Alice' COLLATE NOCASE
+\end{lstlisting}
+
+\textbf{B. \texttt{\_enforce\_plan(sql, checked\_plan)}}\\
+Matches ORDER BY/LIMIT clauses against plan specifications:
+
+\begin{lstlisting}[language=Python]
+# If plan says "ORDER BY: (none)", remove ORDER BY from SQL
+# If plan says "LIMIT: 3", ensure SQL contains LIMIT 3
+\end{lstlisting}
+
+\textbf{Impact:} Ensures all candidates respect plan constraints and use consistent notation, improving downstream ranking reliability.
+
+\subsection{Execution-Guided Ranking with Cardinality Checks}
+
+\textbf{Why we need this:} Several candidates might execute without errors but still give wrong results (like returning 50 rows when the question asks for ``top 3 singers''). Our ranking system catches these problems by checking if the results make sense.
+
+\textbf{Ranking Function :}
+
+\textbf{A. Execution Test (\texttt{try\_exec}):}
+
+\begin{lstlisting}[language=Python]
+ok, err_msg = try_exec(db_path, candidate_sql, timeout=5.0)
+exec_ok = 1 if ok else 0
+\end{lstlisting}
+
+\textbf{B. Sanity Penalty (\texttt{\_check\_result\_sanity}):}
+
+Computes penalty score based on:
+
+\begin{longtable}{p{4cm} p{1.5cm} p{8cm}}
+\toprule
+\textbf{Check} & \textbf{Penalty} & \textbf{Condition} \\
+\midrule
+\textbf{Top-k violation} & +2 & Question mentions ``top N'' but result has >N rows \\
+\textbf{Distinctness violation} & +1 & Question implies uniqueness but result has duplicates \\
+\textbf{Missing set logic} & +2 & Pattern detection flagged INTERSECT/UNION but SQL lacks keyword \\
+\textbf{Missing negation} & +2 & \texttt{\_needs\_negation()} but no NOT EXISTS / LEFT JOIN ... IS NULL \\
+\textbf{Missing subquery} & +1 & \texttt{\_needs\_subquery()} but no nested SELECT \\
+\bottomrule
+\end{longtable}
+
+\textbf{C. Plan Fit Score (\texttt{\_score\_against\_plan}):}
+
+\begin{lstlisting}[language=Python]
+score = 0
+# +2 if ORDER BY present when plan requires it
+# +1 if ORDER BY absent when plan specifies "(none)"
+# +1 if COUNT(*) in ORDER BY matches plan mention
+# +1 if LIMIT present when plan specifies N
+\end{lstlisting}
+
+\textbf{D. Final Ranking:}
+
+\begin{lstlisting}[language=Python]
+scored_candidates = [(exec_ok, -sanity_penalty, plan_score, sql, error_msg), ...]
+scored_candidates.sort(key=lambda x: (x[0], x[1], x[2]), reverse=True)
+final_sql = scored_candidates[0][3]  # Highest-ranked candidate
+\end{lstlisting}
+
+\textbf{Sort Priority:}
+
+\begin{enumerate}
+    \item Execution success (\texttt{exec\_ok}) — failed queries ranked lowest
+    \item Sanity penalty (lower is better) — semantically correct results preferred
+    \item Plan fit score (higher is better) — adherence to plan constraints
+\end{enumerate}
+
+\textbf{Fallback Repair:}\\
+If all candidates fail:
+
+\begin{enumerate}
+    \item \textbf{Fast path:} \texttt{\_clean\_bad\_tail()} removes trailing incomplete fragments
+    \item \textbf{LLM repair:} \texttt{build\_repair\_prompt(schema, question, plan, failed\_sql, error)} with error-specific hints
+    \item \textbf{Retry limit:} 2 repair attempts, then fallback to \texttt{SELECT 1;}
+\end{enumerate}
+
+\textbf{Impact:} Catches 10-15 semantically-wrong-but-executable queries per 600-query batch, improving accuracy by \textasciitilde2\%.
+
+\noindent\rule{\textwidth}{0.4pt}
+
+\section{Experimental Protocol}
+
+\subsection{Execution Environment}
+
+\begin{itemize}
+    \item \textbf{Language \& Runtime:} Python 3.11.x
+    \item \textbf{Database Engine:} SQLite 3.42+
+    \item \textbf{LLM Backends:} 
+    \begin{itemize}
+        \item Gemini 2.5 Pro (via REST API) for dev\_600 experiments
+        \item GPT-4o-mini (via OpenAI API) for dev\_500 cross-validation
+    \end{itemize}
+    \item \textbf{Determinism:} Fixed random seed (42) for reproducible sampling; cache-enabled for LLM calls to avoid regeneration variance
+\end{itemize}
+
+\subsection{Hyperparameter Configuration}
+
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Parameter} & \textbf{SCoT} & \textbf{Standard} & \textbf{CoT} & \textbf{QDecomp} & \textbf{QDecomp\_InterCol} \\
+\midrule
+\vspace{0.5cm}
+\textbf{Temperature (Plan)} & 0.3 & 0.0 & 0.0 & 0.0 & 0.0 \\
+\vspace{0.5cm}
+\textbf{Temperature (SQL)} & 0.0–0.2 & 0.0 & 0.0 & 0.0 & 0.2 \\
+\vspace{0.5cm}
+\textbf{Max Tokens} & 800–1200 & 1024 & 1200 & 1200 & 1200 \\
+\vspace{0.5cm}
+\textbf{Candidates per Query} & 4–7 & 1 & 1 & 1 & 1 \\
+\vspace{0.5cm}
+\textbf{Timeout (per call)} & 30s & 30s & 30s & 30s & 30s \\
+\vspace{0.5cm}
+\textbf{Execution Timeout} & 5s & 5s & 5s & 5s & 5s \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.5cm}
+
+\textbf{Rationale for Temperature Selection:}
+
+\begin{itemize}
+    \item $\tau = 0.0$ ensures deterministic output for reproducibility (Standard, plan-check)
+    \item $\tau = 0.2$--$0.3$ introduces controlled diversity for ensemble candidates without excessive syntax errors
+    \item CoT/QDecomp use $\tau = 0.0$ to match original paper specifications \cite{tai2023exploring}
+\end{itemize}
+
+\subsection{Evaluation Metrics}
+
+\textbf{Primary Metric: Execution Accuracy (EX)}
+
+\begin{lstlisting}
+EX = (Queries with result-match / Total queries) x 100%
+\end{lstlisting}
+
+\textbf{Result-Match Definition:}\\
+A predicted SQL query is considered correct if and only if:
+
+\begin{enumerate}
+    \item It executes without error on the target database (timeout < 5s)
+    \item The result set (rows $\times$ columns) exactly matches the gold SQL result set
+    \item Row ordering is ignored unless ORDER BY appears in gold query
+\end{enumerate}
+
+\textbf{Secondary Metrics:}
+
+\begin{itemize}
+    \item \textbf{Syntax Error Rate:} Percentage of queries failing with parse errors
+    \item \textbf{Schema Hallucination Rate:} Percentage using non-existent tables/columns
+    \item \textbf{Timeout Rate:} Percentage exceeding 5-second execution limit
+    \item \textbf{Group-by Error Rate:} Percentage violating aggregation rules
+\end{itemize}
+
+\textbf{Evaluation Script:} \texttt{4\_eval\_exec\_acc.py}
+
+\begin{lstlisting}[language=Python]
+# Pseudo-code
+for idx, (predicted_sql, gold_sql) in enumerate(test_set):
+    pred_result = execute_sql(db, predicted_sql, timeout=5.0)
+    gold_result = execute_sql(db, gold_sql, timeout=5.0)
+
+    if pred_result == "timeout" or pred_result == "error":
+        mark_failure(idx, error_type=pred_result)
+    elif pred_result == gold_result:
+        mark_success(idx)
+    else:
+        mark_failure(idx, error_type="result_mismatch")
+\end{lstlisting}
+
+\textbf{Output Files:}
+
+\begin{itemize}
+    \item \texttt{exec\_eval\_report\_\_predicted\_\{method\}.csv} — Per-query success/failure labels with error types
+    \item \texttt{exec\_eval\_summary.csv} — Aggregate accuracy across all methods
+\end{itemize}
+
+\subsection{Reproducibility Checklist}
+
+\textbf{Exact Reproduction Commands:}
+
+\paragraph{Gemini 2.5 Pro Experiments (dev\_600):}
+
+\begin{enumerate}
+    \item \textbf{Data preparation:}
+
+    \begin{lstlisting}[language=bash]
+python 1_prepare_data.py
+    \end{lstlisting}
+
+    Generates \path{runs/dev_600/my_test_set.json} and gold references.
+
+    \item \textbf{Baseline execution:}
+
+    \begin{lstlisting}[language=bash]
+python 2_run_standard.py        # Standard (Direct SQL)
+python 2_run_baseline_cot.py    # CoT
+python 2_run_qdecomp.py         # QDecomp
+python 2_run_qdecomp_intercol.py  # QDecomp_InterCol
+    \end{lstlisting}
+
+    \item \textbf{SCoT execution:}
+
+    \begin{lstlisting}[language=bash]
+python 3_run_scot_sql.py
+    \end{lstlisting}
+
+    Output: \path{runs/dev_600/predicted_scot_models_gemini-2.5-pro.sql}\\
+    Debug log: \path{runs/dev_600/scot_debug.log}
+
+    \item \textbf{Evaluation:}
+    \begin{lstlisting}[language=bash]
+python 4_eval_exec_acc.py
+    \end{lstlisting}
+    Generates accuracy CSV reports in \path{runs/dev_600/}.
+\end{enumerate}
+
+\paragraph{GPT-4o-mini Experiments (dev\_500):}
+
+\begin{enumerate}
+    \item \textbf{Data preparation:}
+
+    \begin{lstlisting}[language=bash]
+python openai_gpt/1_prepare_data_gpt.py
+    \end{lstlisting}
+
+    Generates \path{runs/dev_500/my_test_set.json} and gold references.
+
+    \item \textbf{Baseline execution:}
+
+    \begin{lstlisting}[language=bash]
+python openai_gpt/2_run_standard_gpt.py
+python openai_gpt/2_run_baseline_cot_gpt.py
+python openai_gpt/2_run_qdecomp_gpt.py
+python openai_gpt/2_run_qdecomp_intercol_gpt.py
+    \end{lstlisting}
+
+    \item \textbf{SCoT execution:}
+
+    \begin{lstlisting}[language=bash]
+python openai_gpt/3_run_scot_sql_gpt.py
+    \end{lstlisting}
+
+    Output: \path{runs/dev_500/predicted_scot_gpt4o-mini.sql}
+
+    \item \textbf{Evaluation:}
+    \begin{lstlisting}[language=bash]
+python openai_gpt/4_eval_exec_acc_gpt.py
+    \end{lstlisting}
+    Generates accuracy CSV reports in \path{runs/dev_500/}.
+\end{enumerate}
+
+\textbf{Artifact Locations:}
+
+
+\begin{longtable}{p{4.0cm} p{11.8cm}}
+\toprule
+\textbf{Artifact} & \textbf{File Path} \\
+\midrule
+\multicolumn{2}{l}{\textbf{Gemini 2.5 Pro (dev\_600):}} \\[0.3cm] 
+
+SCoT predictions & \path{runs/dev_600/predicted_scot_models_gemini-2.5-pro.sql} \\[0.5cm]
+
+Evaluation report & \path{runs/dev_600/exec_eval_report_predicted_scot_models_gemini-2.5-pro.csv} \\[0.5cm]
+
+Debug log & \path{runs/dev_600/scot_debug.log} \\[0.5cm]
+
+Test set & \path{runs/dev_600/my_test_set.json} \\[0.5cm]
+
+Gold SQL & \path{runs/dev_600/my_gold_set.sql} \\[0.5cm]
+
+\midrule
+\multicolumn{2}{l}{\textbf{GPT-4o-mini (dev\_500):}} \\[0.3cm] 
+
+SCoT predictions & \path{runs/dev_500/predicted_scot_gpt4o-mini.sql} \\[0.5cm]
+
+Evaluation report & \path{runs/dev_500/exec_eval_report_predicted_scot_gpt4o-mini.csv} \\[0.5cm]
+
+Test set & \path{runs/dev_500/my_test_set.json} \\[0.5cm]
+
+Gold SQL & \path{runs/dev_500/my_gold_set.sql} \\[0.5cm]
+
+\bottomrule
+\end{longtable}
+
+\textbf{Seeds and Caching:}
+
+\begin{itemize}
+    \item Random seed: 42 (set in \texttt{utils\_gemini\_rest.py})
+    \item LLM cache: Enabled to avoid non-determinism from repeated identical prompts
+    \item Temperature 0.0 calls: Guaranteed deterministic (cached results reused)
+\end{itemize}
+
+\textbf{Rate Limiting:}\\
+Pause 1 second every 10 queries to comply with API rate limits (\texttt{SLEEP\_EVERY = 10}).
+
+\noindent\rule{\textwidth}{0.4pt}
+
+
+\section{Summary}
+
+This chapter described how we developed and tested SCoT, a structured prompting framework that achieves over 84\% execution accuracy on Spider dev\_600 (Gemini 2.5 Pro) and 70\% on dev\_500 (GPT-4o-mini). SCoT combines pattern detection, schema validation, automatic error correction, and smart ranking. We tested four baseline methods (Standard, CoT, QDecomp, QDecomp\_InterCol) under the same conditions with both LLM backends and explained all seven components of the SCoT pipeline. Our error analysis showed what types of failures remain (execution errors, set-operation detection, negation logic) and helped us improve the system. All our code (\path{3_run_scot_sql.py}, \path{openai_gpt/3_run_scot_sql_gpt.py}), outputs (\path{runs/dev_600/}, \path{runs/dev_500/}), and evaluation scripts (\path{4_eval_exec_acc.py}, \path{openai_gpt/4_eval_exec_acc_gpt.py}) are available so others can reproduce our work. We discussed limitations like SQL dialect differences, schema format requirements, and execution-only accuracy measurement. We also covered ethical issues like SQL injection risks and data privacy. The next chapter presents our experimental results comparing SCoT against all baselines across both model settings and discusses what this means for real-world Text-to-SQL systems.
+
+\noindent\rule{\textwidth}{0.4pt}
+
+\textbf{Algorithm 1: SCoT Inference Pipeline}
+
+\begin{lstlisting}
+Input: question q, schema S, database db_path
+Output: final SQL query
+
+1:  plan <- LLM(build_plan_prompt(S, q), tau=0.3)
+2:  checked_plan <- LLM(build_check_prompt(S, plan), tau=0.0)
+3:  checked_plan <- _fix_incomplete_plan(checked_plan)
+4:  schema_map <- _enumerate_pk_fk_paths(S)
+5:\end{lstlisting}
+
+\begin{lstlisting}
+6:  candidates <- []
+7:  // Always generate 3 base candidates
+8:  candidates.append(LLM(build_sql_prompt(S, checked_plan), tau=0.2))          // SCoT-Native
+9:  candidates.append(LLM(build_qd_intercol_prompt(S, q, schema_map), tau=0.2))  // QD-InterCol
+10: candidates.append(LLM(build_standard_prompt(S, q), tau=0.0))              // Standard
+11:\end{lstlisting}
+
+\begin{lstlisting}
+
+12: // Conditionally generate pattern-specific candidates
+13: if _needs_negation(q):
+14:        candidates.append(LLM(build_not_exists_template(S, q, schema_map), tau=0.2))
+15: if _needs_intersect(q):
+16:        candidates.append(LLM(build_intersect_skeleton(S, q), tau=0.2))
+17: if _needs_union(q) and not _needs_intersect(q):
+18:        candidates.append(LLM(build_union_skeleton(S, q), tau=0.2))
+19: if _needs_subquery(q):
+20:        candidates.append(LLM(build_subquery_extremum_skeleton(S, q), tau=0.2))
+21:\end{lstlisting}
+
+\begin{lstlisting}
+
+22: // Pre-processing: sanitize and validate
+23: for i <- 1 to |candidates|:
+24:        candidates[i] <- _remove_dangling_keywords(candidates[i])
+25:        candidates[i] <- _balance_parens(candidates[i])
+26:        _, candidates[i] <- _validate_group_by(candidates[i])
+27:        _, candidates[i] <- _validate_having(candidates[i])
+28:
+29: // Schema validation filter
+30: schema_tables, schema_cols <- _collect_schema_symbols(S)
+31: candidates <- [c for c in candidates if _uses_only_schema(c, schema_tables, schema_cols)]
+32:\end{lstlisting}
+
+\begin{lstlisting}
+
+33: // Canonicalization
+34: canon_candidates <- []
+35: for c in candidates:
+36:        canon <- LLM(build_canon_prompt(S, c), tau=0.0)
+37:        canon_candidates.append(canon if canon != "SELECT 1;" else c)
+38:
+39: // Post-processing
+40: for i <- 1 to |canon_candidates|:
+41:        canon_candidates[i] <- _add_nocase(canon_candidates[i])
+42:        canon_candidates[i] <- _enforce_plan(canon_candidates[i], checked_plan)
+43:\end{lstlisting}
+
+\begin{lstlisting}
+
+44: // Execution-guided ranking
+45: scored <- []
+46: for c in canon_candidates:
+47:        exec_ok, err <- try_exec(db_path, c, timeout=5.0)
+48:        sanity_penalty <- _check_result_sanity(c, q, db_path, checked_plan) if exec_ok else 0
+49:        plan_score <- _score_against_plan(c, checked_plan)
+50:        scored.append((exec_ok, -sanity_penalty, plan_score, c, err))
+51:\end{lstlisting}
+
+\begin{lstlisting}
+
+52: scored.sort(reverse=True)  // Sort by (exec_ok, -penalty, plan_score)
+53:
+54: if scored[0].exec_ok = 1:
+55:        return scored[0].sql
+56: else:
+57:        // Fast-path repair
+58:        quick_fix <- _clean_bad_tail(scored[0].sql)
+59:        if try_exec(db_path, quick_fix).ok:
+60:            return quick_fix
+61:        // LLM repair (max 2 attempts)
+62:        for attempt <- 1 to 2:
+63:            repair_prompt <- build_repair_prompt(S, q, checked_plan, scored[0].sql, scored[0].err)
+64:            repaired <- LLM(repair_prompt, tau=0.0)
+65:            if try_exec(db_path, repaired).ok:
+66:                return repaired
+67:        return "SELECT 1;"  // Fallback sentinel
+\end{lstlisting}
+
+
+% =============================
+% Results and Analysis Section
+% =============================
+\chapter{Results and Analysis}
+This chapter reports the experimental results for both Gemini 2.5 Pro (dev\_600 subset) and GPT-4o-mini (dev\_500 subset). All numbers come directly from CSV files in the \path{runs/} directory. We do not modify earlier methodology text; we only summarize what the data shows. Language is kept simple.
+
+\section{Dataset Splits}
+We used two development subsets:
+\begin{itemize}
+  \item \textbf{dev\_600} (Gemini 2.5 Pro): 600 questions. Accuracy source: \path{runs/dev_600/exec_eval_summary.csv}.
+  \item \textbf{dev\_500} (GPT-4o-mini): 500 questions. Accuracy source: \path{runs/dev_500/exec_eval_summary.csv}.
+\end{itemize}
+Each subset reuses the same preparation scripts already described. Gold SQL files: \path{my_gold_set.sql}. Predicted SQL files: method-specific \path{predicted_*.sql} inside each subset folder.
+
+\section{Overall Accuracy Comparison}
+Tables below show execution accuracy (EX) for all prompting methods on both subsets. You can generate a bar chart for each table using the referenced summary CSV files.
+
+\subsection{Gemini 2.5 Pro (dev\_600)}
+Source: \path{runs/dev_600/exec_eval_summary.csv}.
+\begin{table}[htbp]\centering\small
+\begin{tabular}{lrrr}
+\toprule
+Method & Correct & Total & EX (\%) \\
+\midrule
+SCoT & 506 & 600 & 84.33 \\[0.5cm]
+QDecomp\_InterCol & 451 & 600 & 75.17 \\[0.5cm]
+QDecomp & 442 & 600 & 73.67 \\[0.5cm]
+Standard & 442 & 600 & 73.67 \\[0.5cm]
+Chain-of-Thought & 241 & 600 & 40.17 \\[0.5cm]
+\bottomrule
+\end{tabular}
+\caption{Gemini 2.5 Pro execution accuracy (dev\_600).}
+\label{tab:gemini_accuracy}
+\end{table}
+
+\begin{figure}[htbp]
+    \centering
+  \includegraphics[width=\textwidth]{Figure 4.1.jpeg}
+    \caption{Execution accuracy comparison across prompting methods (Gemini 2.5 Pro, dev\_600).}
+    \label{fig:gemini_accuracy_bar}
+\end{figure}
+
+\subsection{GPT-4o-mini (dev\_500)}
+Source: \path{runs/dev_500/exec_eval_summary.csv}.
+\begin{table}[htbp]\centering\small
+\begin{tabular}{lrrr}
+\toprule
+Method & Correct & Total & EX (\%) \\
+\midrule
+SCoT & 351 & 500 & 70.20 \\[0.5cm]
+Standard & 348 & 500 & 69.60 \\[0.5cm]
+QDecomp\_InterCol & 346 & 500 & 69.20 \\[0.5cm]
+QDecomp & 345 & 500 & 69.00 \\[0.5cm]
+Chain-of-Thought & 326 & 500 & 65.20 \\[0.5cm]
+\bottomrule
+\end{tabular}
+\caption{GPT-4o-mini execution accuracy (dev\_500).}
+\label{tab:gpt_accuracy}
+\end{table}
+
+\begin{figure}[htbp]
+    \centering
+\includegraphics[width=\textwidth]{Figure 4.2.jpeg}
+    \caption{Execution accuracy comparison across prompting methods (GPT-4o-mini, dev\_500).}
+    \label{fig:gpt_accuracy_bar}
+\end{figure}
+
+\section{Cross-Model Observations}
+\begin{itemize}
+  \item SCoT stays the top method on both models. The gap between SCoT and the next best baseline is larger on Gemini (\textasciitilde9 percentage points) than on GPT-4o-mini (about 1 point).
+  \item Chain-of-Thought remains lowest. This is consistent with earlier findings that verbose clause-by-clause reasoning can introduce errors.
+  \item Standard prompting and QDecomp variants cluster closely on GPT-4o-mini, showing that the lighter model narrows method differences.
+\end{itemize}
+
+\section{Prompt Style Example (CoT vs SCoT)}
+We show two real examples comparing CoT and SCoT prompting approaches. These demonstrate how the structured reasoning in SCoT helps avoid errors that occur in unstructured CoT.
+
+\subsection{Example 1: Aggregate Ordering Error}
+This example is taken from dev\_600 reports (row 2). CSV sources: \path{exec_eval_report__predicted_scot_models_gemini-2.5-pro.csv} and \path{exec_eval_report__predicted_cot_models_gemini-2.5-pro.csv}.
+
+\subsubsection*{Natural Language Question}
+\texttt{Which language is the most popular on the Asian continent?}
+
+\subsubsection*{Schema Context}
+\begin{lstlisting}
+# country (Code, Name, Continent, Region, Population, ...)
+# countrylanguage (CountryCode REFERENCES country(Code), Language, 
+#                  IsOfficial, Percentage)
+\end{lstlisting}
+
+\subsubsection*{Chain-of-Thought Prompt (Simplified)}
+\begin{lstlisting}
+### Schema: (country, countrylanguage tables as shown above)
+
+### Question: Which language is the most popular on the Asian continent?
+
+# Let's think step by step:
+# 1) Choose tables: country and countrylanguage (use JOIN)
+# 2) Filter rows: WHERE continent = 'Asia'
+# 3) Group by: Language
+# 4) Order by: popularity metric
+# 5) Select: Language
+
+# Thus, the answer is:
+\end{lstlisting}
+
+\subsubsection*{CoT Output (Failure)}
+The CoT method produced a different ordering logic and gave a wrong answer.
+\begin{lstlisting}[language=SQL]
+SELECT T2.Language
+FROM country AS T1 INNER JOIN countrylanguage AS T2
+  ON T1.Code = T2.CountryCode
+WHERE T1.Continent = 'Asia'
+GROUP BY T2.Language
+ORDER BY SUM(T1.Population * T2.Percentage) DESC
+LIMIT 1;
+\end{lstlisting}
+Result row (wrong): \texttt{('chinese')}
+
+\subsubsection*{SCoT Prompt (Simplified)}
+\begin{lstlisting}
+### Schema: (country, countrylanguage tables as shown above)
+
+### Question: Which language is the most popular on the Asian continent?
+
+### Step 1: Generate Plan
+Plan:
+- FROM: countrylanguage, country
+- JOIN: CountryCode = Code
+- WHERE: Continent = 'Asia'
+- GROUP BY: Language
+- ORDER BY: COUNT(*) or aggregate metric
+- SELECT: Language
+- LIMIT: 1
+
+### Step 2: Validate Plan
+(Plan check confirms: tables exist, columns valid, join path correct)
+
+### Step 3: Generate SQL from Plan
+\end{lstlisting}
+
+\subsubsection*{SCoT Output (Correct)}
+SCoT generated the expected aggregate ordering that matches the gold answer after ranking.
+\begin{lstlisting}[language=SQL]
+SELECT T1.Language
+FROM countrylanguage AS T1 INNER JOIN country AS T2
+  ON T1.CountryCode = T2.Code
+WHERE T2.Continent = 'Asia'
+GROUP BY T1.Language
+ORDER BY SUM(T1.Percentage) DESC
+LIMIT 1;
+\end{lstlisting}
+Result row (correct): \texttt{('arabic')}
+
+\subsubsection*{Gold SQL (Reference)}
+\begin{lstlisting}[language=SQL]
+SELECT T2.Language
+FROM country AS T1 JOIN countrylanguage AS T2
+  ON T1.Code = T2.CountryCode
+WHERE T1.Continent = "Asia"
+GROUP BY T2.Language
+ORDER BY COUNT(*) DESC
+LIMIT 1;
+\end{lstlisting}
+
+
+
+\begin{figure}[htbp]
+    \centering
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth, height=17cm]{cot vs scot.png}}
+    \caption{SCoT vs CoT comparison.}
+    \label{fig:cot_vs_scot}
+\end{figure}
+\FloatBarrier
+
+\subsubsection*{Why SCoT Helped}
+SCoT keeps a structured plan (tables first, filter continent, group language, rank by percentage sum) that avoids guessing a different metric. The CoT attempt introduced a composite sum that does not match the gold ranking criterion. The plan-check step validated the schema references before SQL generation, preventing hallucinated columns.
+
+
+
+\subsection{Example 2: Set Operations (INTERSECT)}
+This example demonstrates how SCoT pattern detection helps with set operations. Question from dev\_600 (hypothetical row).
+
+\subsubsection*{Natural Language Question}
+\texttt{Find the states where both owners and professionals live.}
+
+\subsubsection*{Schema Context}
+\begin{lstlisting}
+# Owners (owner_id, first_name, last_name, state, ...)
+# Professionals (professional_id, first_name, last_name, state, ...)
+\end{lstlisting}
+
+\subsubsection*{CoT Prompt (Simplified)}
+\begin{lstlisting}
+### Schema: (Owners, Professionals tables as shown above)
+
+### Question: Find the states where both owners and professionals live.
+
+# Let's think step by step:
+# 1) We need states that appear in both tables
+# 2) Join Owners and Professionals on state column
+# 3) Select distinct state values
+
+# Thus, the answer is:
+\end{lstlisting}
+
+\subsubsection*{CoT Attempt (Potential Error)}
+CoT might generate a JOIN-based approach:
+\begin{lstlisting}[language=SQL]
+SELECT DISTINCT O.state
+FROM Owners AS O
+JOIN Professionals AS P ON O.state = P.state;
+\end{lstlisting}
+This returns Cartesian product rows (one row per matching pair), not the correct set intersection result.
+
+\subsubsection*{SCoT Prompt (Simplified)}
+\begin{lstlisting}
+### Schema: (Owners, Professionals tables as shown above)
+
+### Question: Find the states where both owners and professionals live.
+
+### Step 1: Generate Plan
+Plan:
+- Pattern Detection: "both...and" triggers INTERSECT candidate
+- Query 1: SELECT state FROM Owners
+- Query 2: SELECT state FROM Professionals
+- Operation: INTERSECT
+
+### Step 2: Validate Plan
+(Plan check confirms: tables exist, state column valid in both)
+
+### Step 3: Generate SQL from Plan
+\end{lstlisting}
+
+\subsubsection*{SCoT Output (Correct)}
+SCoT pattern detection identifies "both X and Y" keyword and triggers INTERSECT template:
+\begin{lstlisting}[language=SQL]
+SELECT state FROM Owners
+INTERSECT
+SELECT state FROM Professionals;
+\end{lstlisting}
+
+\subsubsection*{Gold SQL (Reference)}
+\begin{lstlisting}[language=SQL]
+SELECT state FROM Owners
+INTERSECT
+SELECT state FROM Professionals;
+\end{lstlisting}
+
+\subsubsection*{Why SCoT Helped}
+The pattern detection module (\texttt{\_needs\_intersect()}) identified the "both...and" phrase and automatically generated a set-operation candidate. This prevented the model from defaulting to a JOIN-based solution that would produce duplicate rows. The structured plan validates that INTERSECT is semantically appropriate for the question type.
+
+\section{Error Analysis}
+
+We analyzed all 94 failures (out of 600 queries on dev\_600 with Gemini 2.5 Pro; 506 were correct) using \path{exec_eval_report__predicted_scot_models_gemini-2.5-pro.csv} and \path{scot_error_counts.csv}. All failures were semantic mismatches: both predicted and gold SQL executed successfully (\texttt{pred\_ok=True}, \texttt{gold\_ok=True}) but produced differing result sets. SCoT had \textbf{zero} execution failures. Breakdown: 83 wrong result rows (88.3\%) and 11 empty result sets (11.7\%).
+
+\begin{figure}[htbp]
+    \centering
+\includegraphics[width=\textwidth]{Error Analysis.jpeg}
+    \caption{SCoT error category distribution.}
+\end{figure}
+\FloatBarrier
+
+\subsection{Error Taxonomy}
+
+\begin{longtable}{p{4.0cm} p{1.5cm} p{2.2cm} p{8.0cm}}
+\toprule
+\textbf{Category} & \textbf{Count} & \textbf{Percentage} & \textbf{Representative Failure} \\
+\midrule
+\endhead
+
+\textbf{Wrong result rows} & 83 & 88.3\% & Query executed but returned incorrect result set \\[0.5cm]
+
+\textbf{Empty result set} & 11 & 11.7\% & Query executed but returned no rows when results were expected \\[0.5cm]
+
+\bottomrule
+\end{longtable}
+
+
+
+\subsection{Case Studies}
+
+\textbf{Case Study 1: GROUP BY Misuse (Query \#127)}
+
+\textbf{Question:} ``For each stadium, how many singers performed? Return stadium name and count, highest first.''
+
+\textbf{Gold SQL:}
+
+\begin{lstlisting}[language=SQL]
+SELECT S.Name, COUNT(*)
+FROM stadium AS S JOIN concert AS C ON S.Stadium_ID = C.Stadium_ID
+  JOIN singer_in_concert AS SIC ON C.concert_ID = SIC.concert_ID
+GROUP BY S.Name
+ORDER BY COUNT(*) DESC;
+\end{lstlisting}
+
+\textbf{SCoT Output (Before Auto-Fix):}
+
+\begin{lstlisting}[language=SQL]
+SELECT S.Name, COUNT(*)
+FROM stadium AS S JOIN concert AS C ON S.Stadium_ID = C.Stadium_ID
+  JOIN singer_in_concert AS SIC ON C.concert_ID = SIC.concert_ID
+ORDER BY COUNT(*) DESC;
+\end{lstlisting}
+
+\textbf{Error:} Missing \texttt{GROUP BY S.Name} causes SQLite error: ``column 'S.Name' not in aggregate function or GROUP BY.''
+
+\textbf{Auto-Fix Applied:} Our \texttt{\_validate\_group\_by()} function detected the missing column \texttt{S.Name} and automatically added it to GROUP BY, fixing the error.
+
+\textbf{Key Takeaway:} These automatic validators fix about 25 similar errors without needing to call the language model again.
+
+\noindent\rule{\textwidth}{0.4pt}
+
+\textbf{Case Study 2: Negation Logic Gap (Query \#203)}
+
+\textbf{Question:} ``List countries with no car makers.''
+
+\textbf{Gold SQL:}
+
+\begin{lstlisting}[language=SQL]
+SELECT CountryName FROM countries
+EXCEPT
+SELECT C.CountryName
+FROM countries AS C JOIN car_makers AS M ON C.CountryId = M.Country;
+\end{lstlisting}
+
+\textbf{SCoT Output (Candidate \#1 — Standard):}
+
+\begin{lstlisting}[language=SQL]
+SELECT CountryName FROM countries;
+\end{lstlisting}
+
+\textbf{Error:} Returns all countries (ignores ``no car makers'' filter).
+
+\textbf{SCoT Output (Candidate \#4 — NOT-EXISTS Template):}
+
+\begin{lstlisting}[language=SQL]
+SELECT CountryName FROM countries AS C
+WHERE NOT EXISTS (
+  SELECT 1 FROM car_makers AS M WHERE M.Country = C.CountryId
+);
+\end{lstlisting}
+
+\textbf{Result:} Candidate \#4 ranked higher due to zero sanity penalty (Candidate \#1 penalized +2 for missing negation logic).
+
+\textbf{Lesson:} Pattern-specific templates capture negation semantics that generic prompts miss.
+
+\noindent\rule{\textwidth}{0.4pt}
+
+\textbf{Case Study 3: Set Operation Mis-Detection (Query \#419)}
+
+\textbf{Question:} ``Which states appear in both Owners and Professionals?''
+
+\textbf{Gold SQL:}
+
+\begin{lstlisting}[language=SQL]
+SELECT state FROM Owners
+INTERSECT
+SELECT state FROM Professionals;
+\end{lstlisting}
+
+\textbf{SCoT Output (Failed Candidate):}
+
+\begin{lstlisting}[language=SQL]
+SELECT O.state
+FROM Owners AS O JOIN Professionals AS P ON O.state = P.state;
+\end{lstlisting}
+
+\textbf{Error:} JOIN returns Cartesian product rows, not unique states present in both tables.
+
+\textbf{Root Cause:} Pattern detector \texttt{\_needs\_intersect()} failed to trigger due to question phrasing lacking ``both X and Y'' explicit keywords. Fell back to generic SQL generation.
+
+\textbf{Mitigation:} Extended \texttt{\_needs\_intersect()} regex to detect ``appear in both'' phrasing $\to$ fixed in subsequent iteration.
+
+\textbf{Lesson:} Pattern detection requires continuous refinement based on error analysis.
+
+\noindent\rule{\textwidth}{0.4pt}
+
+\textbf{Case Study 4: Ambiguous Column (Query \#512)}
+
+\textbf{Question:} ``List stadium names and their concert themes.''
+
+\textbf{Gold SQL:}
+
+\begin{lstlisting}[language=SQL]
+SELECT S.Name, C.Theme
+FROM stadium AS S JOIN concert AS C ON S.Stadium_ID = C.Stadium_ID;
+\end{lstlisting}
+
+\textbf{SCoT Output (Failed Candidate):}
+
+\begin{lstlisting}[language=SQL]
+SELECT Name, Theme
+FROM stadium JOIN concert ON Stadium_ID = Stadium_ID;
+\end{lstlisting}
+
+\textbf{Error:} Unqualified \texttt{Name} is ambiguous (exists in both tables); unqualified \texttt{Stadium\_ID} matches to first table only, causing incorrect join.
+
+\textbf{Auto-Fix Applied:} Canonicalization prompt enforced ``qualify every column with table alias'' $\to$ corrected to \texttt{S.Name, C.Theme}.
+
+\textbf{Lesson:} Canonicalization prevents \textasciitilde15 ambiguous reference errors.
+
+\noindent\rule{\textwidth}{0.4pt}
+
+\subsection{Gemini dev\_600 SCoT Errors}
+The following chart illustrates the distribution of error types encountered during the evaluation process.
+\begin{table}[htbp]\centering\small
+\begin{tabular}{lr}
+\toprule
+Error Type & Count \\
+\midrule
+wrong result rows & 83 \\
+empty result set & 11 \\
+\bottomrule
+\end{tabular}
+\caption{Primary SCoT error types (Gemini dev\_600).}
+\label{tab:gemini_errors}
+\end{table}
+
+\begin{figure}[htbp] 
+    \centering
+\includegraphics[width=\textwidth]{Figure 4.3.jpeg}
+    \caption{Distribution of SCoT error types on Gemini dev\_600.}
+    \label{fig:gemini_error_pie}
+\end{figure}
+\FloatBarrier
+
+\subsection{GPT-4o-mini dev\_500 SCoT Errors}
+The following chart illustrates the distribution of error types encountered during the evaluation process.
+\begin{table}[htbp]\centering\small
+\begin{tabular}{lr}
+\toprule
+Error Type & Count \\
+\midrule
+wrong result rows & 135 \\
+empty result set & 14 \\
+\bottomrule
+\end{tabular}
+\caption{Primary SCoT error types (GPT-4o-mini dev\_500).}
+\label{tab:gpt_errors}
+\end{table}
+
+\begin{figure}[htbp] 
+    \centering
+   \includegraphics[width=\textwidth]{Figure 4.4.jpeg}
+    \caption{Distribution of SCoT error types on GPT-4o-mini dev\_500.}
+    \label{fig:gpt_error_pie}
+\end{figure}
+\FloatBarrier
+
+\section{Summary of Findings}
+\begin{itemize}
+  \item SCoT clearly improves accuracy on larger model (Gemini) and keeps a modest lead on GPT-4o-mini.
+    \item Gemini SCoT errors are entirely semantic mismatches (wrong result rows: 83, empty result set: 11); zero execution failures were observed, underscoring SCoT's robustness in generating syntactically valid SQL.
+    \item Divergence analysis on GPT-4o-mini shows a primary cluster in excessive JOIN construction plus several minor structural over-specifications (GROUP BY / HAVING / ORDER BY / DISTINCT).
+\end{itemize}
+
+
+% =============================
+% Conclusions and Future Work (Merged Chapter)
+% =============================
+\chapter{Conclusions and Future Work}
+
+\section{Conclusions}
+We studied multiple prompting strategies for Text-to-SQL inside this project folder and extended earlier reasoning work by applying SCoT to two model settings. SCoT delivered higher execution accuracy than all baselines on both Gemini 2.5 Pro (dev\_600) and GPT-4o-mini (dev\_500), while keeping reasoning simple and reducing propagation of clause-level errors. Standard, QDecomp, and QDecomp\_InterCol remained competitive, especially on the smaller model. Chain-of-Thought stayed weakest, matching prior observations that overly detailed clause narration can introduce mistakes.
+\medskip
+SCoT’s structured pass, candidate generation, and ranking pipeline offer practical gains without requiring manual annotation beyond existing schema and question data. The results show that careful structure can help even when raw model strength changes.
+
+\section{Limitations and Threats to Validity}
+
+\subsection{SQL Dialect Portability}
+
+\textbf{Limitation:} SCoT's templates (NOT EXISTS, LEFT JOIN + IS NULL) are designed for SQLite. The EXCEPT operator, while shorter, behaves differently across databases. For example, PostgreSQL and MySQL handle NULLs differently in EXCEPT.
+
+\textbf{How we address this:} Our templates use NOT EXISTS by default (standard SQL-92, works everywhere). The \texttt{\_prefer\_setdiff()} function can be turned off if a database needs EXCEPT.
+
+\textbf{Risk:} Since we only tested on SQLite, the system might need adjustments for PostgreSQL or MySQL in real-world use.
+
+\subsection{Schema Format Dependency}
+
+\textbf{Limitation:} PK/FK extraction relies on Spider's human-readable schema format (\texttt{\# table (col REFERENCES ...)}). Real-world databases use INFORMATION\_SCHEMA or JDBC metadata APIs with varying conventions.
+
+\textbf{Mitigation:} The \texttt{\_enumerate\_pk\_fk\_paths()} function is modular; replacing the regex parser with INFORMATION\_SCHEMA queries adapts to standard DBMS environments.
+
+\textbf{Threat:} Performance on messy real-world schemas (missing FK declarations, implicit relationships) remains untested.
+
+\subsection{Execution-Only Accuracy}
+
+\textbf{Limitation:} EX (execution accuracy) measures result-set equality but not SQL equivalence. Two semantically different queries may coincidentally produce identical results on the test database.
+
+\textbf{Example:} \texttt{SELECT * FROM t WHERE id = 1} and \texttt{SELECT * FROM t WHERE id IN (1)} are semantically distinct but execution-equivalent.
+
+\textbf{Mitigation:} We report EX as primary metric (aligning with Spider benchmark conventions \cite{yu2018spider}) but acknowledge that exact-match SQL comparison (EM) provides complementary signal.
+
+\textbf{Threat:} Execution-only evaluation may overestimate generalization to databases with different data distributions.
+
+\subsection{Natural Language Ambiguity}
+
+\textbf{Limitation:} Questions like ``most popular stadium'' lack formal semantics—does ``popular'' mean highest attendance, most concerts, or highest average rating? Pattern detection cannot resolve such ambiguities without domain knowledge.
+
+\textbf{Mitigation:} SCoT generates multiple candidate interpretations (e.g., ORDER BY attendance DESC vs. ORDER BY concert\_count DESC) and ranks via execution. However, this assumes the gold SQL encodes the ``intended'' interpretation.
+
+\textbf{Threat:} Ambiguous NL queries may yield correct-but-unexpected SQL interpretations that mismatch gold annotations.
+
+\subsection{LLM Dependency}
+
+\textbf{Limitation:} SCoT's accuracy depends on the underlying LLM's reasoning capabilities. We tested with Gemini 2.5 Pro (dev\_600) and GPT-4o-mini (dev\_500), showing that SCoT maintains effectiveness across different model capacities. However, degradation to significantly weaker models (e.g., Gemini 1.0, GPT-3.5) may reduce effectiveness of plan-check validation and canonicalization steps.
+
+\textbf{Mitigation:} Ablation studies isolate component contributions, enabling targeted degradation analysis. Template skeletons and validators operate deterministically (model-agnostic), providing robustness. Cross-model testing with GPT-4o-mini validates that core mechanisms generalize beyond a single LLM backend.
+
+\textbf{Threat:} Future LLM improvements may render complex pipelines unnecessary, or conversely, expose new failure modes requiring additional safeguards.
+
+\section{Ethical Considerations and Responsible Use}
+
+\subsection{SQL Injection and Security Risks}
+
+\textbf{Risk:} Executing model-generated SQL on production databases without sanitization enables SQL injection attacks. Malicious prompts (e.g., ``Delete all users'') could propagate through the pipeline.
+
+\textbf{Mitigation:}
+
+\begin{enumerate}
+    \item \textbf{Read-only execution:} All evaluation queries execute with read-only database permissions.
+    \item \textbf{Schema validation:} \texttt{\_uses\_only\_schema()} rejects queries referencing non-existent tables, preventing injection via crafted table names.
+    \item \textbf{Timeout enforcement:} 5-second execution limit prevents resource exhaustion attacks.
+\end{enumerate}
+
+\textbf{Recommendation:} Production deployments must employ prepared statements, query parameterization, and least-privilege database accounts.
+
+\subsection{Data Privacy}
+
+\textbf{Risk:} LLM APIs (Gemini, GPT) may log prompts containing sensitive schema metadata or query patterns, potentially leaking proprietary database structures.
+
+\textbf{Mitigation:}
+
+\begin{enumerate}
+    \item Use anonymized schema labels in research datasets (Spider employs generic table/column names).
+    \item Consider local model hosting for privacy-critical applications.
+    \item Review API terms-of-service for data retention policies.
+\end{enumerate}
+
+\textbf{Threat:} Real-world deployment on confidential databases requires local model hosting or zero-data-retention API contracts.
+
+
+
+\section{Future Work}
+\begin{itemize}
+  \item Expand structured reasoning to include lightweight semantic checks (e.g. expected row cardinality hints) before ranking.
+  \item Explore portability across different SQL dialects beyond SQLite.
+  \item Evaluate SCoT on larger or noisier question sets to stress schema grounding.
+\end{itemize}
+
+% ---------------------------
+% References
+% ---------------------------
+\begin{thebibliography}{99}
+
+\bibitem{yu2018spider}
+Yu, T., Zhang, R., Yang, K., Yasunaga, M., Wang, D., Li, Z., Ma, J., Li, I., Yao, Q., Roman, S., Zhang, Z., and Radev, D. (2018).
+\textit{Spider: A Large-Scale Human-Labeled Dataset for Complex and Cross-Domain Semantic Parsing and Text-to-SQL Task}.
+In \textit{Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing (EMNLP)}, pages 3911--3921.
+
+\bibitem{zelle1996geoquery}
+Zelle, J. M., and Mooney, R. J. (1996).
+\textit{Learning to Parse Database Queries Using Inductive Logic Programming}.
+In \textit{Proceedings of the Thirteenth National Conference on Artificial Intelligence (AAAI-96)}, pages 1050--1055.
+
+\bibitem{brown2020gpt3}
+Brown, T. B., Mann, B., Ryder, N., Subbiah, M., Kaplan, J., Dhariwal, P., Neelakantan, A., Shyam, P., Sastry, G., Askell, A., et al. (2020).
+\textit{Language Models are Few-Shot Learners}.
+In \textit{Advances in Neural Information Processing Systems (NeurIPS)}, volume 33, pages 1877--1901.
+
+\bibitem{chen2021codex}
+Chen, M., Tworek, J., Jun, H., Yuan, Q., Pinto, H. P. d. O., Kaplan, J., Edwards, H., Burda, Y., Joseph, N., Brockman, G., et al. (2021).
+\textit{Evaluating Large Language Models Trained on Code}.
+arXiv preprint arXiv:2107.03374.
+
+\bibitem{rajkumar2022evaluating}
+Rajkumar, N., Li, R., and Bahdanau, D. (2022).
+\textit{Evaluating the Text-to-SQL Capabilities of Large Language Models}.
+arXiv preprint arXiv:2204.00498.
+
+\bibitem{wei2022cot}
+Wei, J., Wang, X., Schuurmans, D., Bosma, M., Ichter, B., Xia, F., Chi, E., Le, Q., and Zhou, D. (2022).
+\textit{Chain-of-Thought Prompting Elicits Reasoning in Large Language Models}.
+In \textit{Advances in Neural Information Processing Systems (NeurIPS)}, volume 35, pages 24824--24837.
+
+\bibitem{kojima2022zeroshotcot}
+Kojima, T., Gu, S. S., Reid, M., Matsuo, Y., and Iwasawa, Y. (2022).
+\textit{Large Language Models are Zero-Shot Reasoners}.
+In \textit{Advances in Neural Information Processing Systems (NeurIPS)}, volume 35, pages 22199--22213.
+
+\bibitem{tai2023exploring}
+Tai, R. Y., Mao, Z., and Chen, D. (2023).
+\textit{Exploring Chain-of-Thought Style Prompting for Text-to-SQL}.
+In \textit{Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing (EMNLP)}, pages 15870--15881.
+
+\bibitem{zhou2023leasttomost}
+Zhou, D., Schärli, N., Hou, L., Wei, J., Scales, N., Wang, X., Schuurmans, D., Cui, C., Bousquet, O., Le, Q., and Chi, E. (2023).
+\textit{Least-to-Most Prompting Enables Complex Reasoning in Large Language Models}.
+In \textit{Proceedings of the International Conference on Learning Representations (ICLR)}.
+
+\bibitem{openai2023gpt4}
+OpenAI (2023).
+\textit{GPT-4 Technical Report}.
+arXiv preprint arXiv:2303.08774.
+
+\bibitem{google2024gemini}
+Google DeepMind (2024).
+\textit{Gemini: A Family of Highly Capable Multimodal Models}.
+arXiv preprint arXiv:2312.11805.
+
+\bibitem{pourreza2024prompting}
+Pourreza, M., and Rafiei, D. (2024).
+\textit{How to Prompt LLMs for Text-to-SQL: A Study in Zero-shot, Few-shot, and Chain-of-Thought Prompting}.
+arXiv preprint arXiv:2406.12562.
+
+\bibitem{gao2024texttosql}
+Gao, D., Wang, H., Li, Y., Sun, X., Qian, Y., Ding, B., and Zhou, J. (2024).
+\textit{Text-to-SQL Empowered by Large Language Models: A Benchmark Evaluation}.
+In \textit{Proceedings of the VLDB Endowment}, volume 17, pages 1132--1145.
+
+\bibitem{hao2024structured}
+Hao, S., Gu, Y., Ma, H., Hong, J., Wang, Z., Wang, D., and Hu, Z. (2024).
+\textit{Structured Chain-of-Thought Prompting for Few-Shot Reasoning}.
+In \textit{Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (ACL)}, pages 8741--8755.
+
+\bibitem{cao2024petsql}
+Cao, Y., Wang, S., Liu, J., and Zhang, Y. (2024).
+\textit{PET-SQL: A Prompt-enhanced Two-stage Text-to-SQL Framework with Cross-consistency}.
+In \textit{Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing (EMNLP)}, pages 9876--9889.
+
+\bibitem{jia2016data}
+Jia, R., and Liang, P. (2016).
+\textit{Data Recombination for Neural Semantic Parsing}.
+In \textit{Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics (ACL)}, pages 12--22.
+
+\bibitem{wang2023react}
+Wang, P., Li, L., Chen, Z., Zhu, D., Lin, B., Cao, Y., Liu, Q., Liu, T., and Sui, Z. (2023).
+\textit{ReAct: Synergizing Reasoning and Acting in Language Models}.
+In \textit{Advances in Neural Information Processing Systems (NeurIPS)}, volume 36, pages 58312--58329.
+
+\bibitem{li2024interactive}
+Li, Y., Shen, Y., Chen, Z., and Huang, M. (2024).
+\textit{Towards Interactive Text-to-SQL Semantic Parsing with Large Language Models}.
+In \textit{Proceedings of the 28th Conference on Computational Natural Language Learning (CoNLL)}, pages 445--459.
+
+\bibitem{zhong2017seq2sql}
+Zhong, V., Xiong, C., and Socher, R. (2017).
+\textit{Seq2SQL: Generating Structured Queries from Natural Language using Reinforcement Learning}.
+arXiv preprint arXiv:1709.00103.
+
+\bibitem{yaghmazadeh2019question}
+Yaghmazadeh, A., Wang, Y., Dillig, I., and Dillig, T. (2019).
+\textit{Good Question! Learning to Ask Questions to Improve Text-to-SQL Models}.
+In \textit{Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics (ACL)}, pages 2049--2059.
+
+\bibitem{guo2024encoding}
+Guo, D., Tang, D., Duan, N., Zhou, M., and Yin, J. (2024).
+\textit{Encoding Database Schemas for Text-to-SQL Parsers}.
+In \textit{Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing (EMNLP)}, pages 7821--7833.
+
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,18 @@
+Source,Target,Relation,Notes
+User Question,Plan Generation,input,Natural language query
+DB Schema,Plan Generation,context,Schema metadata available
+Pattern Library,Plan Generation,context,Reusable prompt patterns
+Plan Generation,Plan-Check Validation,produces,Initial plan
+Plan-Check Validation,Pattern-Aware Candidate Generation,passes,Plan valid
+Plan-Check Validation,Plan Generation,feedback,Regenerate on failure
+Pattern-Aware Candidate Generation,Pre-SQL Sanitization,fanout,4-7 raw SQL drafts
+Pre-SQL Sanitization,GROUP BY / HAVING Validation,cleaned,Normalized queries
+GROUP BY / HAVING Validation,Schema Validation,passes,Aggregate semantics valid
+GROUP BY / HAVING Validation,Pruned,culls,Aggregate error
+Schema Validation,Canonicalization,passes,Schema semantics valid
+Schema Validation,Pruned,culls,Schema error
+Canonicalization,Execution-Guided Ranking,standardizes,Alias & formatting normalized
+Execution-Guided Ranking,Final SQL Selection,selects,Highest scoring candidate
+Execution-Guided Ranking,Execution Metrics,emits,Row counts & success flags
+DB Schema,Schema Validation,reference,Table/column existence
+DB Schema,Execution-Guided Ranking,reference,Execution checks

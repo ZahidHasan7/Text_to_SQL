@@ -1,0 +1,73 @@
+graph TB
+    subgraph CoT["Chain-of-Thought (CoT) Approach"]
+        direction TB
+        C1[Input: Question + Schema]
+        C2[Generate Reasoning Steps<br/>Clause-by-Clause Narrative]
+        C3[Step 1: Choose tables FROM/JOIN]
+        C4[Step 2: Filter rows WHERE]
+        C5[Step 3: Group if needed GROUP BY]
+        C6[Step 4: Filter groups HAVING]
+        C7[Step 5: Final columns SELECT]
+        C8[Generate Single SQL Query]
+        C9[Execute & Evaluate]
+        
+        C1 --> C2
+        C2 --> C3
+        C3 --> C4
+        C4 --> C5
+        C5 --> C6
+        C6 --> C7
+        C7 --> C8
+        C8 --> C9
+        
+        style C1 fill:#e1f5ff
+        style C2 fill:#fff3e0
+        style C8 fill:#c8e6c9
+        style C9 fill:#ffcdd2
+    end
+    
+    subgraph SCoT["Structured Chain-of-Thought (SCoT) Approach"]
+        direction TB
+        S1[Input: Question + Schema]
+        S2[Phase 1: Plan Generation<br/>JSON-Structured Format]
+        S3[Phase 2: Plan-Check Validation<br/>Verify Schema Correctness]
+        S4[Phase 3: Pattern Detection<br/>Negation/Intersect/Union/Subquery]
+        S5[Phase 4: Multi-Candidate Generation<br/>4-7 SQL Candidates]
+        S6[Phase 5: Pre-SQL Sanitization<br/>Balance Parens, Remove Danglers]
+        S7[Phase 6: GROUP BY/HAVING Validation<br/>Auto-Fix Aggregation Errors]
+        S8[Phase 7: Schema Validation<br/>Reject Hallucinated Columns]
+        S9[Phase 8: Canonicalization<br/>Qualify Columns, Enforce Plan]
+        S10[Phase 9: Execution-Guided Ranking<br/>Sanity Checks + Plan Fit Score]
+        S11[Select Best SQL Query]
+        S12[Execute & Evaluate]
+        
+        S1 --> S2
+        S2 --> S3
+        S3 --> S4
+        S4 --> S5
+        S5 --> S6
+        S6 --> S7
+        S7 --> S8
+        S8 --> S9
+        S9 --> S10
+        S10 --> S11
+        S11 --> S12
+        
+        style S1 fill:#e1f5ff
+        style S2 fill:#fff3e0
+        style S3 fill:#f3e5f5
+        style S4 fill:#e0f2f1
+        style S5 fill:#fff9c4
+        style S11 fill:#c8e6c9
+        style S12 fill:#ffcdd2
+    end
+    
+    %% Add comparison annotations
+    note1[/"❌ Error Propagation Risk<br/>Single reasoning path<br/>No validation"/]
+    note2[/"✓ Multiple Safety Layers<br/>Ensemble candidates<br/>Automated fixes"/]
+    
+    C9 -.-> note1
+    S12 -.-> note2
+    
+    style note1 fill:#ffebee,stroke:#c62828,stroke-width:2px
+    style note2 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
