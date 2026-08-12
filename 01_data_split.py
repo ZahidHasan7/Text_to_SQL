@@ -43,9 +43,12 @@ GOLD_SQL_PATH  = SPIDER_DIR / "dev_gold.sql"
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 # Use all 1034 examples from Spider dev set.
-# Per the experimental design in the journal paper, the full dev set is used
-# for evaluation. Few-shot examples in the SCoT prompt use different database
-# instances than those in the test set at the query level.
+# Few-shot examples in SCoT/CoT prompts are drawn exclusively from the Spider
+# TRAINING set databases (department_management, flight_1,
+# employee_hire_evaluation, car_1, world_1), which do NOT appear in the dev set.
+# This provides the same evaluation protocol as DIN-SQL and DAIL-SQL:
+#   - In-context examples: Spider TRAIN set
+#   - Evaluation: full Spider DEV set (1034 examples, zero contamination)
 NUM_SAMPLES   = 1034   # Full Spider dev set
 RANDOM_SEED   = 42     # Fixed seed for reproducibility (reported in paper)
 

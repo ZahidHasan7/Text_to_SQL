@@ -755,116 +755,120 @@ DEBUG_LOG_FILE = RUN_DIR / "scot_debug.log" # Added for Instruction 7
 SLEEP_EVERY = 10
 
 # UPDATE E: Added 3 new patterns (UNION, EXCEPT, INTERSECT)
-FEW_SHOT_PLAN = """# SCoT Plan (few-shot)
-Input Question: List top 3 highest Rating TV series. List the TV series's Episode and Rating.
+# ─────────────────────────────────────────────────────────────────────────────
+# FEW_SHOT_PLAN — all examples are drawn from the Spider TRAINING set.
+# None of these databases appear in the Spider DEV set used for evaluation.
+# This ensures strict separation between in-context learning and evaluation,
+# consistent with DIN-SQL (Pourreza & Rafiei, 2023) and DAIL-SQL (Gao et al., 2023).
+# Training databases used: department_management, flight_1,
+#   employee_hire_evaluation, car_1, world_1
+# ─────────────────────────────────────────────────────────────────────────────
+FEW_SHOT_PLAN = """# SCoT Plan (few-shot) — examples from Spider TRAIN set only
+
+# Example 1: Simple SELECT + ORDER BY + LIMIT
+# DB: department_management (TRAIN)
+Input Question: What are the names of the top 3 departments with the most employees? List the department name and employee count.
 Schema (API-Docs):
-# TV_series (id, Episode, Air_Date, Rating, Share, 18_49_Rating_Share, Viewers_m, Weekly_Rank, Channel)
+# department (Department_ID, Name, Creation, Ranking, Budget_in_Billions, Num_Employees)
 
 SCoT-Plan:
-- FROM: TV_series
+- FROM: department
 - WHERE: (none)
 - GROUP BY: (none)
 - HAVING: (none)
-- ORDER BY: Rating DESC
-- SELECT: Episode, Rating
+- ORDER BY: Num_Employees DESC
+- SELECT: Name, Num_Employees
 - LIMIT: 3
 
-# JOIN + GROUP BY example
-Input Question: For each stadium, how many singers performed? Return stadium Name and count, highest first.
+# Example 2: JOIN + GROUP BY + HAVING
+# DB: employee_hire_evaluation (TRAIN)
+Input Question: For each shop, how many employees got hired? Only include shops with more than 2 hires. Return shop name and count.
 Schema (API-Docs):
-# stadium (Stadium_ID, Location, Name, Capacity, Highest, Lowest, Average)
-# singer_in_concert (concert_ID, Singer_ID)
-# concert (concert_ID, concert_Name, Theme, Stadium_ID, Year)
+# shop (Shop_ID, Name, Location, District, Number_products, Manager_name)
+# hiring (Shop_ID, Employee_ID, Start_from, Is_full_time)
+# employee (Employee_ID, Name, Age, City)
 
 SCoT-Plan:
-- FROM: stadium AS S JOIN concert AS C ON S.Stadium_ID = C.Stadium_ID
-        JOIN singer_in_concert AS SIC ON C.concert_ID = SIC.concert_ID
+- FROM: shop AS S JOIN hiring AS H ON S.Shop_ID = H.Shop_ID
 - WHERE: (none)
 - GROUP BY: S.Name
-- HAVING: (none)
-- ORDER BY: COUNT(*) DESC
+- HAVING: COUNT(*) > 2
+- ORDER BY: (none)
 - SELECT: S.Name, COUNT(*)
 - LIMIT: (none)
 
-# Set operation example
-Input Question: Which states appear in both Owners and Professionals?
+# Example 3: INTERSECT (values common to two sets)
+# DB: flight_1 (TRAIN)
+Input Question: Which airlines operate flights both from airport 'AHD' and to airport 'AHD'?
 Schema (API-Docs):
-# Owners (owner_id, first_name, last_name, street, city, state, zip_code, email_address, home_phone, cell_number)
-# Professionals (professional_id, role_code, first_name, street, city, state, zip_code, last_name, email_address, home_phone, cell_number)
+# airlines (uid, Airline, Abbreviation, Country)
+# airports (City, AirportCode, AirportName, Country, CountryAbbrev)
+# flights (Airline, FlightNo, SourceAirport, DestAirport)
 
 SCoT-Plan:
-- FROM: Owners ; Professionals
-- WHERE: (none)
+- FROM: airlines AS A JOIN flights AS F ON A.uid = F.Airline
+- WHERE: F.SourceAirport = 'AHD'
 - GROUP BY: (none)
 - HAVING: (none)
 - ORDER BY: (none)
-- SELECT: state (intersection)
-- LIMIT: (none)
-
-# UNION example (filter + group + union)
-Input Question: Which professionals live in Indiana OR handled more than 2 treatments? Return id, last_name, cell_number.
-Schema (API-Docs):
-# Professionals (professional_id, last_name, cell_number, state, ...)
-# Treatments (treatment_id, professional_id, ...)
-SCoT-Plan:
-- FROM: Professionals
-- WHERE: state = 'Indiana'
-- GROUP BY: (none)
-- HAVING: (none)
-- ORDER BY: (none)
-- SELECT: professional_id, last_name, cell_number
-- LIMIT: (none)
--- UNION --
-- FROM: Professionals AS P JOIN Treatments AS T ON P.professional_id = T.professional_id
-- WHERE: (none)
-- GROUP BY: P.professional_id
-- HAVING: COUNT(*) > 2
-- ORDER BY: (none)
-- SELECT: P.professional_id, P.last_name, P.cell_number
-- LIMIT: (none)
-
-# EXCEPT example (anti-join by set diff)
-Input Question: Names of countries with no car makers.
-Schema (API-Docs):
-# countries (CountryId, CountryName, ...)
-# car_makers (Id, Country, ...)
-SCoT-Plan:
-- FROM: countries
-- WHERE: (none)
-- GROUP BY: (none)
-- HAVING: (none)
-- ORDER BY: (none)
-- SELECT: CountryName
-- LIMIT: (none)
--- EXCEPT --
-- FROM: countries AS C JOIN car_makers AS M ON C.CountryId = M.Country
-- WHERE: (none)
-- GROUP BY: C.CountryName
-- HAVING: (none)
-- ORDER BY: (none)
-- SELECT: C.CountryName
-- LIMIT: (none)
-
-# INTERSECT with JOIN example (two directors)
-Input Question: Series name and country of channels that air cartoons by BOTH Ben Jones and Michael Chang.
-Schema (API-Docs):
-# TV_Channel (id, series_name, country)
-# Cartoon (id, Title, Directed_by, Channel)
-SCoT-Plan:
-- FROM: TV_Channel AS T JOIN Cartoon AS C ON T.id = C.Channel
-- WHERE: C.Directed_by = 'Ben Jones'
-- GROUP BY: (none)
-- HAVING: (none)
-- ORDER BY: (none)
-- SELECT: T.series_name, T.country
+- SELECT: A.Airline
 - LIMIT: (none)
 -- INTERSECT --
-- FROM: TV_Channel AS T JOIN Cartoon AS C ON T.id = C.Channel
-- WHERE: C.Directed_by = 'Michael Chang'
+- FROM: airlines AS A JOIN flights AS F ON A.uid = F.Airline
+- WHERE: F.DestAirport = 'AHD'
 - GROUP BY: (none)
 - HAVING: (none)
 - ORDER BY: (none)
-- SELECT: T.series_name, T.country
+- SELECT: A.Airline
+- LIMIT: (none)
+
+# Example 4: UNION (combine two disjoint result sets)
+# DB: car_1 (TRAIN)
+Input Question: What are the names of car makers from the USA or those that make more than 5 car models? Return maker name.
+Schema (API-Docs):
+# countries (CountryId, CountryName, Continent)
+# car_makers (Id, Maker, FullName, Country)
+# model_list (ModelId, Maker, Model)
+
+SCoT-Plan:
+- FROM: car_makers AS M JOIN countries AS C ON M.Country = C.CountryId
+- WHERE: C.CountryName = 'usa'
+- GROUP BY: (none)
+- HAVING: (none)
+- ORDER BY: (none)
+- SELECT: M.FullName
+- LIMIT: (none)
+-- UNION --
+- FROM: car_makers AS M JOIN model_list AS ML ON M.Id = ML.Maker
+- WHERE: (none)
+- GROUP BY: M.FullName
+- HAVING: COUNT(*) > 5
+- ORDER BY: (none)
+- SELECT: M.FullName
+- LIMIT: (none)
+
+# Example 5: EXCEPT (values in first set but not second)
+# DB: world_1 (TRAIN)
+Input Question: Which languages are spoken in some country but are NOT the official language of any country?
+Schema (API-Docs):
+# country (Code, Name, Continent, SurfaceArea, Population, GNP)
+# countrylanguage (CountryCode, Language, IsOfficial, Percentage)
+
+SCoT-Plan:
+- FROM: countrylanguage
+- WHERE: (none)
+- GROUP BY: (none)
+- HAVING: (none)
+- ORDER BY: (none)
+- SELECT: Language
+- LIMIT: (none)
+-- EXCEPT --
+- FROM: countrylanguage
+- WHERE: IsOfficial = 'T'
+- GROUP BY: (none)
+- HAVING: (none)
+- ORDER BY: (none)
+- SELECT: Language
 - LIMIT: (none)
 """
 
