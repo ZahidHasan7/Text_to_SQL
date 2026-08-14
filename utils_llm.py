@@ -121,7 +121,7 @@ def _call_gemini(prompt: str, models: List[str], timeout: int, temperature: floa
                 time.sleep(0.3)
                 break
         time.sleep(0.4)
-    raise SystemExit(f"CRITICAL API ERROR: All Gemini models failed. Network issue or API overloaded. Last error: {last_err}")
+    raise RuntimeError(f"All Gemini models failed. Last error: {last_err}")
 
 def _call_openai(prompt: str, models: List[str], timeout: int, temperature: float, max_tokens: int, max_retries: int) -> Tuple[str, str]:
     if not OPENAI_API_KEY:
@@ -157,7 +157,7 @@ def _call_openai(prompt: str, models: List[str], timeout: int, temperature: floa
                 time.sleep(0.25)
                 break
         time.sleep(0.3)
-    raise SystemExit(f"CRITICAL API ERROR: All OpenAI models failed. Network issue or API overloaded. Last error: {last_err}")
+    raise RuntimeError(f"All OpenAI models failed. Last error: {last_err}")
 
 # --- OpenRouter Implementation ---
 
@@ -200,7 +200,7 @@ def _call_openrouter(prompt: str, models: List[str], timeout: int, temperature: 
                 time.sleep(0.25)
                 break
         time.sleep(0.3)
-    raise SystemExit(f"CRITICAL API ERROR: All OpenRouter models failed. Network issue or API overloaded. Last error: {last_err}")
+    raise RuntimeError(f"All OpenRouter models failed. Last error: {last_err}")
 
 # --- Unified API ---
 

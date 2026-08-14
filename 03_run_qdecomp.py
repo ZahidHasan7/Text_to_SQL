@@ -1,6 +1,6 @@
 # 2_run_qdecomp.py
 # QDecomp: break into sub-questions (one-pass) -> final SQL
-import json, time, re
+import json, sys, time, re
 from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv()
@@ -98,8 +98,9 @@ def main():
             txt = gemini_generate_text(p, temperature=0.2, max_output_tokens=800, timeout=30)
             sql = extract_sql(txt)
         except Exception as e:
-            print(f" [ERR] {i}/{len(data)} -> {e}")
-            sql = "SELECT 1;"
+            print(f"\n[CRITICAL ERROR] API or Network failure at item {i}: {e}")
+            print("Terminating run. Fix the issue and restart to resume from this item.")
+            sys.exit(1)
         preds.append(sql)
         out_f.write(sql + "\n")
         out_f.flush()
