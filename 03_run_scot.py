@@ -1259,12 +1259,24 @@ def run():
     data = json.loads(INPUT_TEST_SET.read_text(encoding="utf-8"))
     print(f"[i] Loaded {len(data)} items from {INPUT_TEST_SET}")
 
-    # Clear debug log on start
-    if DEBUG_LOG_FILE.exists():
-        DEBUG_LOG_FILE.unlink()
-
+    start_idx = 0
     preds = []
+    if OUTPUT_FILE.exists():
+        with open(OUTPUT_FILE, "r", encoding="utf-8") as f:
+            preds = [line.strip() for line in f if line.strip()]
+        start_idx = len(preds)
+        print(f"[i] Found {start_idx} existing predictions. Resuming...")
+    else:
+        # Clear debug log on fresh start
+        if DEBUG_LOG_FILE.exists():
+            DEBUG_LOG_FILE.unlink()
+
+    # Open in append mode for streaming writes
+    out_f = OUTPUT_FILE.open("a", encoding="utf-8")
+
     for i, ex in enumerate(data, 1):
+        if i <= start_idx:
+            continue
         schema = ex["schema_str"]
         q      = ex["question"]
         
@@ -1577,7 +1589,9 @@ def run():
             print(f"  [Debug Log ERR] {i}/{len(data)} -> {e}")
 
 
-        preds.append(sql) 
+        preds.append(sql)
+        out_f.write(sql + "\n")
+        out_f.flush() 
 
         # Progress prints and sleep block
         print(f"  [OK] {i}/{len(data)}")
@@ -1585,10 +1599,7 @@ def run():
             print(f"  ... processed {i}, short pause ...")
             time.sleep(1.0)
 
-    # Final file write block
-    with OUTPUT_FILE.open("w", encoding="utf-8") as f:
-        for s in preds:
-            f.write(s + "\n")
+    out_f.close()
     print(f"[OK] Saved -> {OUTPUT_FILE}")
     print(f"[OK] Debug Log -> {DEBUG_LOG_FILE}")
 

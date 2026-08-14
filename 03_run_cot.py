@@ -106,6 +106,8 @@ def run():
 
             sql = extract_sql_from_response(resp_text)
             preds.append(sql)
+        out_f.write(sql + "\n")
+        out_f.flush()
 
             if i % SLEEP_EVERY == 0:
                 print(f"  ... processed {i}, short pause ...")

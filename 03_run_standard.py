@@ -55,8 +55,19 @@ def extract_sql(text: str) -> str:
 def main():
     data = json.loads(INPUT_TEST_SET.read_text(encoding="utf-8"))
     print(f"[i] Loaded {len(data)} items")
+    start_idx = 0
     preds = []
+    if OUTPUT_FILE.exists():
+        with open(OUTPUT_FILE, "r", encoding="utf-8") as f:
+            preds = [line.strip() for line in f if line.strip()]
+        start_idx = len(preds)
+        print(f"[i] Found {start_idx} existing predictions. Resuming...")
+    
+    out_f = OUTPUT_FILE.open("a", encoding="utf-8")
+
     for i, ex in enumerate(data, 1):
+        if i <= start_idx:
+            continue
         p = build_prompt(ex["schema_str"], ex["question"])
         try:
             txt = generate_text(p, temperature=0.0, max_output_tokens=600, timeout=30)
@@ -65,11 +76,12 @@ def main():
             print(f" [ERR] {i}/{len(data)} -> {e}")
             sql = "SELECT 1;"
         preds.append(sql)
+        out_f.write(sql + "\n")
+        out_f.flush()
         if i % SLEEP_EVERY == 0:
             print(f" ... processed {i}, pause ...")
             time.sleep(1.0)
-    with OUTPUT_FILE.open("w", encoding="utf-8") as f:
-        for s in preds: f.write(s + "\n")
+    out_f.close()
     print(f"[OK] Saved -> {OUTPUT_FILE}")
 
 if __name__ == "__main__":
