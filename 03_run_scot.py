@@ -749,8 +749,15 @@ Bad SQL:
 
 RUN_DIR   = PROJ_ROOT / "runs" / "spider_full"
 INPUT_TEST_SET = RUN_DIR / "my_test_set.json"
-OUTPUT_FILE    = RUN_DIR / "predicted_scot_models_gemini-2.5-pro.sql"
-DEBUG_LOG_FILE = RUN_DIR / "scot_debug.log" # Added for Instruction 7
+
+MODEL_ID = (
+    os.getenv("GEMINI_MODEL")
+    or os.getenv("OPENROUTER_MODEL")
+    or "models/gemini-3.6-flash"
+).strip()
+MODEL_FILE_STEM = MODEL_ID.replace("/", "_").replace(":", "_").replace(" ", "_")
+OUTPUT_FILE    = RUN_DIR / f"predicted_scot_models_{MODEL_FILE_STEM}.sql"
+DEBUG_LOG_FILE = RUN_DIR / f"scot_debug_{MODEL_FILE_STEM}.log"
 
 SLEEP_EVERY = 10
 

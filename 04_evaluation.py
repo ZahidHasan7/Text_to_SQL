@@ -30,6 +30,7 @@ import sqlite3
 import json
 import csv
 import datetime
+import os
 import sys
 from pathlib import Path
 
@@ -40,9 +41,15 @@ TEST_JSON = RUN_DIR / "my_test_set.json"
 
 # ── Prediction files to evaluate ─────────────────────────────────────────────
 # Add or remove filenames here. Missing files are skipped with a warning.
+MODEL_ID = (
+    os.getenv("GEMINI_MODEL")
+    or os.getenv("OPENROUTER_MODEL")
+    or "models/gemini-3.6-flash"
+).strip()
+MODEL_FILE_STEM = MODEL_ID.replace("/", "_").replace(":", "_").replace(" ", "_")
 PRED_FILES = [
-    RUN_DIR / "predicted_scot_models_gemini-2.5-pro.sql",
-    RUN_DIR / "predicted_cot_models_gemini-2.5-pro.sql",
+    RUN_DIR / f"predicted_scot_models_{MODEL_FILE_STEM}.sql",
+    RUN_DIR / f"predicted_cot_models_{MODEL_FILE_STEM}.sql",
     RUN_DIR / "predicted_standard.sql",
     RUN_DIR / "predicted_qdecomp.sql",
     RUN_DIR / "predicted_qd_intercol.sql",
