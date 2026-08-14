@@ -1279,6 +1279,8 @@ def run():
             continue
         schema = ex["schema_str"]
         q      = ex["question"]
+
+        print(f"[Q{i}/{len(data)}] start")
         
         # Collect schema symbols for validation
         schema_tables, schema_cols = _collect_schema_symbols(schema)
@@ -1291,6 +1293,7 @@ def run():
             plan = _to_text(ask_with_retry_cached(
     plan_prompt, temperature=0.3, max_output_tokens=800, timeout=30
 ))
+            print(f"  [Q{i}] method=PLAN")
 
         except Exception as e:
             print(f"  [Plan ERR] {i}/{len(data)} -> {e}")
@@ -1303,6 +1306,7 @@ def run():
             checked = _to_text(ask_with_retry_cached(
                 check_prompt, temperature=0.0, max_output_tokens=800, timeout=30
             ))
+            print(f"  [Q{i}] method=PLAN-CHECK")
         except Exception as e:
             print(f"  [Check ERR] {i}/{len(data)} -> {e}")
             checked = plan  # fallback
@@ -1334,6 +1338,7 @@ def run():
             cand_sql = extract_sql(sql_text)
             if cand_sql.strip().lower() != "select 1;":
                 candidates.append(("SCoT-Native", cand_sql))
+            print(f"  [Q{i}] method=SCoT-Native")
         except Exception:
             pass
         
@@ -1345,6 +1350,7 @@ def run():
             qd_sql = extract_sql(qd_text)
             if qd_sql.strip().lower() != "select 1;":
                 candidates.append(("QD-InterCol", qd_sql))
+            print(f"  [Q{i}] method=QD-InterCol")
         except Exception:
             pass
         
@@ -1358,6 +1364,7 @@ def run():
             std_sql = extract_sql(std_text)
             if std_sql.strip().lower() != "select 1;":
                 candidates.append(("Standard", std_sql))
+            print(f"  [Q{i}] method=Standard")
         except Exception:
             pass
         
@@ -1372,6 +1379,7 @@ def run():
                 neg_sql = extract_sql(neg_text)
                 if neg_sql.strip().lower() != "select 1;":
                     candidates.append(("NOT-EXISTS", neg_sql))
+                print(f"  [Q{i}] method=NOT-EXISTS")
             except Exception:
                 pass
         
@@ -1384,6 +1392,7 @@ def run():
                 intersect_sql = extract_sql(intersect_text)
                 if intersect_sql.strip().lower() != "select 1;":
                     candidates.append(("INTERSECT", intersect_sql))
+                print(f"  [Q{i}] method=INTERSECT")
             except Exception:
                 pass
         
@@ -1396,6 +1405,7 @@ def run():
                 union_sql = extract_sql(union_text)
                 if union_sql.strip().lower() != "select 1;":
                     candidates.append(("UNION", union_sql))
+                print(f"  [Q{i}] method=UNION")
             except Exception:
                 pass
         
@@ -1408,6 +1418,7 @@ def run():
                 subq_sql = extract_sql(subq_text)
                 if subq_sql.strip().lower() != "select 1;":
                     candidates.append(("SUBQUERY", subq_sql))
+                print(f"  [Q{i}] method=SUBQUERY")
             except Exception:
                 pass
         
@@ -1531,6 +1542,7 @@ def run():
         if scored_candidates and scored_candidates[0][0] == 1:  # At least one succeeded
             sql = scored_candidates[0][3]
             last_error = ""
+            print(f"  [Q{i}] selected={sql[:80].replace(chr(10), ' ')}")
         else:
             sql = None
             last_error = scored_candidates[0][4] if scored_candidates else "failed to execute"
@@ -1561,6 +1573,7 @@ def run():
                     ok2, err_msg2 = try_exec(ex["db_path"], fixed_sql_processed)
                     if ok2:
                         sql = fixed_sql_processed
+                        print(f"  [Q{i}] method=REPAIR")
                     else:
                         # Second repair attempt
                         rep_prompt2 = build_repair_prompt(schema, q, checked, fixed_sql_processed, err_msg2)
@@ -1573,6 +1586,8 @@ def run():
                         fixed_sql2_processed = _enforce_plan(_add_nocase(fixed_sql2), checked)
                         ok3, _ = try_exec(ex["db_path"], fixed_sql2_processed) # Don't care about 3rd error
                         sql = fixed_sql2_processed if ok3 else "SELECT 1;"
+                        if ok3:
+                            print(f"  [Q{i}] method=REPAIR-2")
                 except Exception:
                     sql = "SELECT 1;"
         
