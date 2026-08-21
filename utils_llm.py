@@ -20,7 +20,7 @@ OPENROUTER_BASE = os.getenv("OPENROUTER_BASE", "https://openrouter.ai/api/v1")
 
 DEFAULT_GEMINI_MODELS = ["models/gemini-3.6-flash"]
 DEFAULT_OPENAI_MODELS = ["gpt-4o-mini"]
-OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "google/gemini-2.5-pro")
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "z-ai/glm-5.2:free")
 DEFAULT_OPENROUTER_MODELS = [OPENROUTER_MODEL]
 
 # Auto-detect provider: prefer OpenRouter if its key is set, fallback to Gemini/OpenAI
@@ -112,7 +112,11 @@ def _call_gemini(prompt: str, models: List[str], timeout: int, temperature: floa
             except requests.HTTPError as e:
                 last_err = e
                 status = e.response.status_code if e.response is not None else None
-                if status in (429, 503) and attempt < max_retries - 1:
+                if status == 429:
+                    print(f"[gemini] Rate limited (429). Sleeping for 60 seconds... (Attempt {attempt+1}/{max_retries})")
+                    time.sleep(60)
+                    continue
+                elif status in (500, 503) and attempt < max_retries - 1:
                     time.sleep((2 ** attempt) + random.uniform(0, 0.35))
                     continue
                 break
@@ -191,8 +195,16 @@ def _call_openrouter(prompt: str, models: List[str], timeout: int, temperature: 
             except requests.HTTPError as e:
                 last_err = e
                 status = e.response.status_code if e.response is not None else None
-                if status in (429, 500, 502, 503) and attempt < max_retries - 1:
-                    time.sleep((2 ** attempt) + random.uniform(0, 0.4))
+                if status == 429:
+                    # Free-tier upstream limits: wait patiently and retry
+                    wait = 60 + (attempt * 30)  # 60s, 90s, 120s, 150s ...
+                    print(f"[openrouter] Rate limited (429) on {m}. Upstream free-tier limit. Waiting {wait}s... (Attempt {attempt+1}/{max_retries})")
+                    time.sleep(wait)
+                    continue
+                elif status in (500, 502, 503) and attempt < max_retries - 1:
+                    wait = (2 ** attempt) + random.uniform(0, 0.4)
+                    print(f"[openrouter] Server error ({status}). Retrying in {wait:.1f}s...")
+                    time.sleep(wait)
                     continue
                 break
             except Exception as e:
@@ -200,7 +212,7 @@ def _call_openrouter(prompt: str, models: List[str], timeout: int, temperature: 
                 time.sleep(0.25)
                 break
         time.sleep(0.3)
-    raise RuntimeError(f"All OpenRouter models failed. Last error: {last_err}")
+    raise RuntimeError(f"All OpenRouter models failed after {max_retries} attempts. Last error: {last_err}")
 
 # --- Unified API ---
 
@@ -211,7 +223,7 @@ def generate_text(
     timeout: int = 60,
     temperature: float = 0.0,
     max_output_tokens: int = 2048,
-    max_retries: int = 5,
+    max_retries: int = 10,
     return_model: bool = False,
 ) -> Union[str, Tuple[str, str]]:
     
