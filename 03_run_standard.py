@@ -1,6 +1,6 @@
 # 2_run_standard.py
 # Standard: no reasoning. Direct SQL only (fenced), temp=0.0
-import json, sys, time, re
+import json, sys, time, re, os
 from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv()
@@ -10,7 +10,9 @@ from utils_llm import generate_text
 PROJ_ROOT = Path(__file__).resolve().parent
 RUN_DIR   = PROJ_ROOT / "runs" / "spider_full"
 INPUT_TEST_SET = RUN_DIR / "my_test_set.json"
-OUTPUT_FILE    = RUN_DIR / "predicted_standard.sql"
+MODEL_ID = (os.getenv("OPENROUTER_MODEL") or os.getenv("GEMINI_MODEL") or "google/gemini-2.5-flash").strip()
+MODEL_FILE_STEM = MODEL_ID.replace("/", "_").replace(":", "_").replace(" ", "_")
+OUTPUT_FILE    = RUN_DIR / f"predicted_standard_models_{MODEL_FILE_STEM}.sql"
 SLEEP_EVERY = 10
 
 def build_prompt(schema_str: str, question: str) -> str:

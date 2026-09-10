@@ -33,6 +33,8 @@ import datetime
 import os
 import sys
 from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv()
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 PROJ_ROOT = Path(__file__).resolve().parent
@@ -42,17 +44,17 @@ TEST_JSON = RUN_DIR / "my_test_set.json"
 # ── Prediction files to evaluate ─────────────────────────────────────────────
 # Add or remove filenames here. Missing files are skipped with a warning.
 MODEL_ID = (
-    os.getenv("GEMINI_MODEL")
-    or os.getenv("OPENROUTER_MODEL")
+    os.getenv("OPENROUTER_MODEL")
+    or os.getenv("GEMINI_MODEL")
     or "models/gemini-3.6-flash"
 ).strip()
 MODEL_FILE_STEM = MODEL_ID.replace("/", "_").replace(":", "_").replace(" ", "_")
 PRED_FILES = [
     RUN_DIR / f"predicted_scot_models_{MODEL_FILE_STEM}.sql",
     RUN_DIR / f"predicted_cot_models_{MODEL_FILE_STEM}.sql",
-    RUN_DIR / "predicted_standard.sql",
-    RUN_DIR / "predicted_qdecomp.sql",
-    RUN_DIR / "predicted_qd_intercol.sql",
+    RUN_DIR / f"predicted_standard_models_{MODEL_FILE_STEM}.sql",
+    RUN_DIR / f"predicted_qdecomp_models_{MODEL_FILE_STEM}.sql",
+    RUN_DIR / f"predicted_qd_intercol_models_{MODEL_FILE_STEM}.sql",
 ]
 
 QUERY_TIMEOUT_SEC = 10   # SQLite per-query execution timeout
@@ -80,9 +82,18 @@ def run_query(db_path: str, sql: str) -> tuple[bool, object]:
     Execute sql against the SQLite database at db_path.
     Returns (success: bool, result_rows_or_error_string).
     Result rows are normalised and sorted for order-insensitive comparison.
+    Uses set_progress_handler to enforce a real per-query execution timeout.
     """
+    import time as _time
     try:
-        con = sqlite3.connect(db_path, timeout=QUERY_TIMEOUT_SEC)
+        con = sqlite3.connect(db_path)
+        # Real execution timeout: interrupt query if it exceeds QUERY_TIMEOUT_SEC
+        _start = _time.monotonic()
+        def _timeout_check():
+            if _time.monotonic() - _start > QUERY_TIMEOUT_SEC:
+                return 1  # non-zero → interrupt query
+            return 0
+        con.set_progress_handler(_timeout_check, 1000)  # check every 1000 VM ops
         cur = con.cursor()
         cur.execute(sql)
         rows = cur.fetchall()
@@ -215,7 +226,7 @@ def main():
         return
 
     # ── Summary CSV ───────────────────────────────────────────────────────────
-    sum_csv = RUN_DIR / "eval_summary.csv"
+    sum_csv = RUN_DIR / f"eval_summary_{MODEL_FILE_STEM}.csv"
     csv_fields = ["pred_file", "total", "correct", "exec_acc_pct",
                   "api_failures", "exec_errors", "evaluated_at"]
     with sum_csv.open("w", newline="", encoding="utf-8") as f:
@@ -241,7 +252,7 @@ def main():
         "run_at"  : datetime.datetime.utcnow().isoformat() + "Z",
         "results" : summary,
     }
-    log_path = RUN_DIR / "experiment_log.json"
+    log_path = RUN_DIR / f"experiment_log_{MODEL_FILE_STEM}.json"
     log_path.write_text(json.dumps(experiment_log, indent=2), encoding="utf-8")
 
     # ── Print final table ─────────────────────────────────────────────────────
