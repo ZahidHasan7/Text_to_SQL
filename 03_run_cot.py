@@ -5,7 +5,7 @@
 import os, json, sys, time
 from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)
 
 from utils_llm import generate_text
 
@@ -131,6 +131,8 @@ def run():
             sys.exit(1)
 
         sql = extract_sql_from_response(resp_text)
+        print(f"\n[Ex {i}] Question: {q}")
+        print(f"[Ex {i}] Generated SQL:\n{sql}\n")
         out_f.write(sql + "\n")
         out_f.flush()
 

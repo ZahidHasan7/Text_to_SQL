@@ -7,7 +7,7 @@ from typing import List, Optional, Tuple, Union
 import requests
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 # --- Configurations ---
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
