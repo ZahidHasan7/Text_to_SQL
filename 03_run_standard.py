@@ -3,7 +3,7 @@
 import json, sys, time, re, os
 from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)
 
 from utils_llm import generate_text
 
@@ -74,6 +74,7 @@ def main():
         try:
             txt = generate_text(p, temperature=0.0, max_output_tokens=600, timeout=30)
             sql = extract_sql(txt)
+            print(f"[{i}/1034] Q: {ex['question'][:60]}...\n         SQL: {sql[:80]}\n")
         except Exception as e:
             print(f"\n[CRITICAL ERROR] API or Network failure at item {i}: {e}")
             print("Terminating run. Fix the issue and restart to resume from this item.")

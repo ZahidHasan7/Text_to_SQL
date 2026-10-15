@@ -1,0 +1,162 @@
+{
+ "models_anthropic_claude-haiku-4.5|cot": [
+  722,
+  1034,
+  420,
+  600,
+  302,
+  434
+ ],
+ "models_google_gemini-2.5-flash|cot": [
+  764,
+  1034,
+  444,
+  600,
+  320,
+  434
+ ],
+ "models_meta-llama_llama-3.3-70b-instruct|cot": [
+  706,
+  1034,
+  411,
+  600,
+  295,
+  434
+ ],
+ "models_openai_gpt-4o-mini|cot": [
+  681,
+  1034,
+  389,
+  600,
+  292,
+  434
+ ],
+ "models_anthropic_claude-haiku-4.5|qdecomp": [
+  748,
+  1034,
+  439,
+  600,
+  309,
+  434
+ ],
+ "models_google_gemini-2.5-flash|qdecomp": [
+  804,
+  1034,
+  463,
+  600,
+  341,
+  434
+ ],
+ "models_meta-llama_llama-3.3-70b-instruct|qdecomp": [
+  755,
+  1034,
+  449,
+  600,
+  306,
+  434
+ ],
+ "models_openai_gpt-4o-mini|qdecomp": [
+  721,
+  1034,
+  414,
+  600,
+  307,
+  434
+ ],
+ "models_anthropic_claude-haiku-4.5|qd_intercol": [
+  764,
+  1034,
+  444,
+  600,
+  320,
+  434
+ ],
+ "models_google_gemini-2.5-flash|qd_intercol": [
+  801,
+  1034,
+  460,
+  600,
+  341,
+  434
+ ],
+ "models_meta-llama_llama-3.3-70b-instruct|qd_intercol": [
+  780,
+  1034,
+  451,
+  600,
+  329,
+  434
+ ],
+ "models_openai_gpt-4o-mini|qd_intercol": [
+  731,
+  1034,
+  420,
+  600,
+  311,
+  434
+ ],
+ "models_anthropic_claude-haiku-4.5|scot": [
+  702,
+  1034,
+  402,
+  600,
+  300,
+  434
+ ],
+ "models_google_gemini-2.5-flash|scot": [
+  801,
+  1034,
+  462,
+  600,
+  339,
+  434
+ ],
+ "models_meta-llama_llama-3.3-70b-instruct|scot": [
+  670,
+  1034,
+  395,
+  600,
+  275,
+  434
+ ],
+ "models_openai_gpt-4o-mini|scot": [
+  565,
+  1034,
+  265,
+  600,
+  300,
+  434
+ ],
+ "models_anthropic_claude-haiku-4.5|standard": [
+  753,
+  1034,
+  439,
+  600,
+  314,
+  434
+ ],
+ "models_google_gemini-2.5-flash|standard": [
+  787,
+  1034,
+  449,
+  600,
+  338,
+  434
+ ],
+ "models_meta-llama_llama-3.3-70b-instruct|standard": [
+  758,
+  1034,
+  436,
+  600,
+  322,
+  434
+ ],
+ "models_openai_gpt-4o-mini|standard": [
+  735,
+  1034,
+  427,
+  600,
+  308,
+  434
+ ]
+}

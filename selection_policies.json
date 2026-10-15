@@ -1,0 +1,46 @@
+{
+ "gemini": {
+  "n": 1034,
+  "match_final": 1034,
+  "oracle": 863,
+  "qdic": 771,
+  "qdic_present": 1034,
+  "maj": 808,
+  "selected": 801,
+  "maj_tie_fb": 31,
+  "maj_noexec_fb": 2
+ },
+ "gpt4o": {
+  "n": 998,
+  "match_final": 849,
+  "oracle": 786,
+  "qdic": 659,
+  "qdic_present": 998,
+  "maj": 709,
+  "selected": 666,
+  "maj_tie_fb": 98,
+  "maj_noexec_fb": 2
+ },
+ "llama": {
+  "n": 1034,
+  "match_final": 1034,
+  "oracle": 832,
+  "qdic": 732,
+  "qdic_present": 1034,
+  "maj": 743,
+  "selected": 670,
+  "maj_tie_fb": 96,
+  "maj_noexec_fb": 2
+ },
+ "haiku": {
+  "n": 1034,
+  "match_final": 1034,
+  "oracle": 827,
+  "qdic": 736,
+  "qdic_present": 1034,
+  "maj": 762,
+  "selected": 702,
+  "maj_tie_fb": 55,
+  "maj_noexec_fb": 3
+ }
+}

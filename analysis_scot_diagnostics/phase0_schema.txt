@@ -1,0 +1,42 @@
+
+=== Phase 0: Data Schema and Stage-to-Field Mapping ===
+
+DEBUG LOG FORMAT (scot_debug_<backend>.log)
+-------------------------------------------
+Each query block starts with:  --- IDX <n> (<db_id>) ---
+
+Fields per block (in order):
+  PLAN:         Raw output of Stage 1 (Plan Generation).
+                Contains "SCoT-Plan:" header + clauses (FROM/WHERE/GROUP BY/HAVING/ORDER BY/SELECT/LIMIT).
+  CHECKED:      Output of Stage 2 (Plan-Check). Same format. May differ from PLAN if validator changed it.
+  RAW_SQL_TEXTS: Python list of (method_name, raw_llm_text) for each candidate before SQL extraction.
+                 Records Stage 3 output before any parsing.
+  CANDS:        Python list of (method_name, extracted_sql) - post Stage 4 (pre-sanitization) extraction.
+                NOTE: the label says "CANDS" but inspection shows it holds PRE-canon extracted SQL.
+  RAW_CANON_TEXTS: Raw LLM output for canonicalization (Stage 4 canonicalization step).
+  CANON_CANDS:  Python list of extracted SQL after canonicalization.
+  LAST_ERROR:   Last SQLite error seen during repair (Stage 7 repair loop).
+  FINAL_SQL:    The answer selected by Stage 7.
+
+STAGE-TO-FIELD MAPPING
+-----------------------
+Stage 1 (Plan generation)       -> PLAN field
+Stage 2 (Plan-check)            -> CHECKED field
+Stage 3 (Candidate generation)  -> RAW_SQL_TEXTS (raw LLM text) + CANDS (extracted SQL)
+Stage 4 (Pre-SQL sanitization)  -> NOT directly logged; applied between CANDS and execution ranking.
+                                   CAN be recomputed by calling original rule-based functions on CANDS.
+Stage 5 (GROUP BY/HAVING fix)   -> NOT directly logged. Same: recomputable from CANDS.
+Stage 6 (Schema validation)     -> NOT directly logged. Recomputable from CANDS + schema.
+Stage 7 (Execution ranking)     -> FINAL_SQL field; LAST_ERROR gives repair error context.
+
+NOTE: Stages 4-6 are applied BEFORE canonicalization in the code, but CANON_CANDS reflects
+      the post-canon candidates. The CANDS field holds pre-sanitization SQL.
+
+EVAL_REPORT CSV SCHEMA
+-----------------------
+Columns: idx, db_id, question, match, pred_exec_ok, gold_exec_ok, is_api_failure,
+         pred_sql, gold_sql, pred_result, gold_result
+
+  match         : "True" if result sets match (EX=1)
+  pred_exec_ok  : "True" if predicted SQL executed without error
+  is_api_failure: "True" if prediction is "SELECT 1;" (LLM fallback)

@@ -136,7 +136,7 @@ def eval_one(pred_file: Path, test_data: list) -> dict:
     rows_out     = []
 
     for i, (ex, pred_sql) in enumerate(zip(test_data, preds), 1):
-        db      = ex["db_path"]
+        db      = ex["db_path"].replace("C:\\Users\\Pathao Ltd\\Desktop\\Text_to_SQL-main", str(PROJ_ROOT))
         gold_sql = ex["gold_query"].strip().rstrip(";") + ";"
         pred_sql = pred_sql.strip().rstrip(";") + ";"
 
